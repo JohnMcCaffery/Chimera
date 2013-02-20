@@ -151,7 +151,6 @@
             this.blankEventToolStripMenuItem.Name = "blankEventToolStripMenuItem";
             this.blankEventToolStripMenuItem.Size = new System.Drawing.Size(157, 22);
             this.blankEventToolStripMenuItem.Text = "Blank Event";
-            this.blankEventToolStripMenuItem.Click += new System.EventHandler(this.blankEventToolStripMenuItem_Click);
             // 
             // FlythroughPanel
             // 
