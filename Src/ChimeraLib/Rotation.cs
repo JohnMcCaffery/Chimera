@@ -25,6 +25,16 @@ using OpenMetaverse;
 
 namespace UtilLib {
     public class Rotation {
+        /*public static bool operator!=(Rotation rot1, Rotation rot2) {
+            return  !(rot1.Equals(null) && rot2.Equals(null)) &&
+                   (rot1.Equals(null) ||
+                    rot2.Equals(null) || 
+                    rot1.Yaw != rot2.Yaw || 
+                    rot1.Pitch != rot2.Pitch);
+        }
+        public static bool operator==(Rotation rot1, Rotation rot2) {
+            return !rot1.Equals(null) && !rot2.Equals(null) && rot1.Yaw == rot2.Yaw && rot1.Pitch == rot2.Pitch;
+        }*/
         public static Rotation operator +(Rotation r1, Rotation r2) {
             return new Rotation(r1.Pitch + r2.Pitch, r1.Yaw + r2.Yaw);
         }
@@ -131,7 +141,15 @@ namespace UtilLib {
         public Rotation() { }
 
         /// <summary>
-        /// Initialise the VirtualRotationOffset looking along the specified vector.
+        /// Initialise the Rotation from the specified rotation.
+        /// </summary>
+        /// <param name="lookAtVector">Another rotation to copy the values from.</param>
+        public Rotation(Rotation rotation) {
+            LookAtVector = rotation.LookAtVector;
+        }
+
+        /// <summary>
+        /// Initialise the Rotation looking along the specified vector.
         /// </summary>
         /// <param name="lookAtVector">A vector representing the direction along which this VirtualRotationOffset starts looking.</param>
         public Rotation(Vector3 lookAtVector) {
@@ -139,7 +157,7 @@ namespace UtilLib {
         }
 
         /// <summary>
-        /// Initiliase the VirtualRotationOffset with the specified yaw and pitch.
+        /// Initiliase the Rotation with the specified yaw and pitch.
         /// </summary>
         /// <param name="pitch">The pitch value for this VirtualRotationOffset to start with.</param>
         /// <param name="yaw">The yaw value for this VirtualRotationOffset to start with.</param>

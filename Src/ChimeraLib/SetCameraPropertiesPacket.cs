@@ -26,86 +26,122 @@ using OpenMetaverse;
 using UtilLib;
 
 namespace ChimeraLib {
-
     /// <exclude/>
-    public sealed class SetCameraPropertiesPacket : Packet {
+    public sealed class SetWindowPacket: Packet {
         /// <exclude/>
-        public sealed class CameraPropertyBlock : PacketBlock {
-            public float FrustumOffsetH;
-            public float FrustumOffsetV;
-            public float FrustumNear;
-            public float CameraAngle;
-            public float AspectRatio;
-            public bool AspectSet = false;
-            public bool SetNear = false;
+        public sealed class WindowBlock : PacketBlock {
+            public Matrix4 ProjectionMatrix;
+            public Vector3 Position;
+            public Vector3 PositionDelta;
+            public Vector3 LookAt;
+            public Vector3 LookAtDelta;
+            public uint TickLength;
+            public UUID Source;
 
             public override int Length {
                 get {
-                    return 22;
+                    //Matrix (4x4 floats (4bit) + 4 vector3s (3x floats (4bits)) + (1 xint) UUID
+                    return (sizeof(float) * 16) + (sizeof(float) * 3 * 4) + sizeof(int) + Source.GetBytes().Length;
                 }
             }
 
-            public CameraPropertyBlock() { }
-            public CameraPropertyBlock(byte[] bytes, ref int i) {
+            public WindowBlock() { }
+            public WindowBlock(byte[] bytes, ref int i) {
                 FromBytes(bytes, ref i);
             }
 
             public override void FromBytes(byte[] bytes, ref int i) {
                 try {
-                    FrustumOffsetH = Utils.BytesToFloat(bytes, i); i += 4;
-                    FrustumOffsetV = Utils.BytesToFloat(bytes, i); i += 4;
-                    FrustumNear = Utils.BytesToFloat(bytes, i); i += 4;
-                    CameraAngle = Utils.BytesToFloat(bytes, i); i += 4;
-                    AspectRatio = Utils.BytesToFloat(bytes, i); i += 4;
-                    AspectSet = bytes[i++] == 0 ? false : true;
-                    SetNear = bytes[i++] == 0 ? false : true;
+                    Vector4 r1 = new Vector4(), r2 = new Vector4(), r3 = new Vector4(), r4 = new Vector4();
+                    r1.FromBytes(bytes, i); i += sizeof(float) * 4;
+                    r2.FromBytes(bytes, i); i += sizeof(float) * 4;
+                    r3.FromBytes(bytes, i); i += sizeof(float) * 4;
+                    r4.FromBytes(bytes, i); i += sizeof(float) * 4;
+
+                    ProjectionMatrix.M11 = r1.X;
+                    ProjectionMatrix.M12 = r1.Y;
+                    ProjectionMatrix.M13 = r1.Z;
+                    ProjectionMatrix.M14 = r1.W;
+
+                    ProjectionMatrix.M21 = r2.X;
+                    ProjectionMatrix.M22 = r2.Y;
+                    ProjectionMatrix.M23 = r2.Z;
+                    ProjectionMatrix.M24 = r2.W;
+
+                    ProjectionMatrix.M31 = r3.X;
+                    ProjectionMatrix.M32 = r3.Y;
+                    ProjectionMatrix.M33 = r3.Z;
+                    ProjectionMatrix.M34 = r3.W;
+
+                    ProjectionMatrix.M41 = r4.X;
+                    ProjectionMatrix.M42 = r4.Y;
+                    ProjectionMatrix.M43 = r4.Z;
+                    ProjectionMatrix.M44 = r4.W;
+
+                    Position.FromBytes(bytes, i); i += 12;
+                    PositionDelta.FromBytes(bytes, i); i += 12;
+                    LookAt.FromBytes(bytes, i); i += 12;
+                    LookAtDelta.FromBytes(bytes, i); i += 12;
+
+                    TickLength = Utils.BytesToUInt(bytes, i); i += sizeof(int);
+
+                    Source.FromBytes(bytes, i);
                 } catch (Exception) {
                     throw new MalformedDataException();
                 }
             }
 
             public override void ToBytes(byte[] bytes, ref int i) {
-                Utils.FloatToBytes(FrustumOffsetH, bytes, i); i += 4;
-                Utils.FloatToBytes(FrustumOffsetV, bytes, i); i += 4;
-                Utils.FloatToBytes(FrustumNear, bytes, i); i += 4;
-                Utils.FloatToBytes(CameraAngle, bytes, i); i += 4;
-                Utils.FloatToBytes(AspectRatio, bytes, i); i += 4;
-                bytes[i++] = (byte)(AspectSet ? 1 : 0);
-                bytes[i++] = (byte)(SetNear ? 1 : 0);
-            }
+                //Vector4 r1;
+                //ProjectionMatrix.UpAxis
+                Utils.FloatToBytes(ProjectionMatrix.M11, bytes, i); i += 4;
+                Utils.FloatToBytes(ProjectionMatrix.M12, bytes, i); i += 4;
+                Utils.FloatToBytes(ProjectionMatrix.M13, bytes, i); i += 4;
+                Utils.FloatToBytes(ProjectionMatrix.M14, bytes, i); i += 4;
+                Utils.FloatToBytes(ProjectionMatrix.M21, bytes, i); i += 4;
+                Utils.FloatToBytes(ProjectionMatrix.M22, bytes, i); i += 4;
+                Utils.FloatToBytes(ProjectionMatrix.M23, bytes, i); i += 4;
+                Utils.FloatToBytes(ProjectionMatrix.M34, bytes, i); i += 4;
+                Utils.FloatToBytes(ProjectionMatrix.M31, bytes, i); i += 4;
+                Utils.FloatToBytes(ProjectionMatrix.M32, bytes, i); i += 4;
+                Utils.FloatToBytes(ProjectionMatrix.M33, bytes, i); i += 4;
+                Utils.FloatToBytes(ProjectionMatrix.M34, bytes, i); i += 4;
+                Utils.FloatToBytes(ProjectionMatrix.M41, bytes, i); i += 4;
+                Utils.FloatToBytes(ProjectionMatrix.M42, bytes, i); i += 4;
+                Utils.FloatToBytes(ProjectionMatrix.M43, bytes, i); i += 4;
+                Utils.FloatToBytes(ProjectionMatrix.M44, bytes, i); i += 4;
 
+                Position.ToBytes(bytes, i); i += 12;
+                PositionDelta.ToBytes(bytes, i); i += 12;
+                LookAt.ToBytes(bytes, i); i += 12;
+                LookAtDelta.ToBytes(bytes, i); i += 12;
+
+                Utils.UIntToBytes(TickLength, bytes, i); i += sizeof(int);
+
+                Source.ToBytes(bytes, i);
+            }
         }
 
         public override int Length {
             get {
                 int length = 10;
-                length += CameraProperty.Length;
+                length += Window.Length;
                 return length;
             }
         }
-        public CameraPropertyBlock CameraProperty;
+        public WindowBlock Window;
 
-        public SetCameraPropertiesPacket() {
+        public SetWindowPacket () {
             HasVariableBlocks = false;
-            //Type = PacketType.SetCameraProperties;
+            //Type = PacketType.SetFollowCamProperties;
             Header = new Header();
             Header.Frequency = PacketFrequency.Low;
             Header.ID = 427;
             Header.Reliable = true;
-            CameraProperty = new CameraPropertyBlock();
+            Window = new WindowBlock();
         }
 
-        public SetCameraPropertiesPacket(bool enable) : this() {
-            if (!enable) {
-                CameraProperty.FrustumOffsetH = 0f;
-                CameraProperty.FrustumOffsetV = 0f;
-                CameraProperty.CameraAngle = 1f;
-                CameraProperty.AspectSet = false;
-                CameraProperty.SetNear = false;
-            }
-        }
-
-        public SetCameraPropertiesPacket(byte[] bytes, ref int i)
+        public SetWindowPacket(byte[] bytes, ref int i)
             : this() {
             int packetEnd = bytes.Length - 1;
             FromBytes(bytes, ref i, ref packetEnd, null);
@@ -117,10 +153,10 @@ namespace ChimeraLib {
                 packetEnd = Helpers.ZeroDecode(bytes, packetEnd + 1, zeroBuffer) - 1;
                 bytes = zeroBuffer;
             }
-            CameraProperty.FromBytes(bytes, ref i);
+            Window.FromBytes(bytes, ref i);
         }
 
-        public SetCameraPropertiesPacket(Header head, byte[] bytes, ref int i)
+        public SetWindowPacket(Header head, byte[] bytes, ref int i)
             : this() {
             int packetEnd = bytes.Length - 1;
             FromBytes(head, bytes, ref i, ref packetEnd);
@@ -128,17 +164,17 @@ namespace ChimeraLib {
 
         override public void FromBytes(Header header, byte[] bytes, ref int i, ref int packetEnd) {
             Header = header;
-            CameraProperty.FromBytes(bytes, ref i);
+            Window.FromBytes(bytes, ref i);
         }
 
         public override byte[] ToBytes() {
             int length = 10;
-            length += CameraProperty.Length;
+            length += Window.Length;
             if (Header.AckList != null && Header.AckList.Length > 0) { length += Header.AckList.Length * 4 + 1; }
             byte[] bytes = new byte[length];
             int i = 0;
             Header.ToBytes(bytes, ref i);
-            CameraProperty.ToBytes(bytes, ref i);
+            Window.ToBytes(bytes, ref i);
             if (Header.AckList != null && Header.AckList.Length > 0) { Header.AcksToBytes(bytes, ref i); }
             return bytes;
         }
@@ -149,117 +185,117 @@ namespace ChimeraLib {
     }
 
     /// <exclude/>
-    public sealed class SetFrustumPacket: Packet {
+    public sealed class ClearWindowPacket : Packet
+    {
         /// <exclude/>
-        public sealed class FrustumBlock : PacketBlock {
-            public float x1;
-            public float x2;
-            public float y1;
-            public float y2;
-            public float dn;
-            public float df;
-            public bool ControlFrustum = false;
+        public sealed class ObjectDataBlock : PacketBlock
+        {
+            public UUID ObjectID;
 
-            public override int Length {
-                get {
-                    return 25;
+            public override int Length
+            {
+                get
+                {
+                    return 16;
                 }
             }
 
-            public FrustumBlock() { }
-            public FrustumBlock(byte[] bytes, ref int i) {
+            public ObjectDataBlock() { }
+            public ObjectDataBlock(byte[] bytes, ref int i)
+            {
                 FromBytes(bytes, ref i);
             }
 
-            public override void FromBytes(byte[] bytes, ref int i) {
-                try {
-                    x1 = Utils.BytesToFloat(bytes, i); i += 4;
-                    x2 = Utils.BytesToFloat(bytes, i); i += 4;
-                    y1 = Utils.BytesToFloat(bytes, i); i += 4;
-                    y2 = Utils.BytesToFloat(bytes, i); i += 4;
-                    dn = Utils.BytesToFloat(bytes, i); i += 4;
-                    df = Utils.BytesToFloat(bytes, i); i += 4;
-                    ControlFrustum = bytes[i++] == 0 ? false : true;
-                } catch (Exception) {
+            public override void FromBytes(byte[] bytes, ref int i)
+            {
+                try
+                {
+                    ObjectID.FromBytes(bytes, i); i += 16;
+                }
+                catch (Exception)
+                {
                     throw new MalformedDataException();
                 }
             }
 
-            public override void ToBytes(byte[] bytes, ref int i) {
-                Utils.FloatToBytes(x1, bytes, i); i += 4;
-                Utils.FloatToBytes(x2, bytes, i); i += 4;
-                Utils.FloatToBytes(y1, bytes, i); i += 4;
-                Utils.FloatToBytes(y2, bytes, i); i += 4;
-                Utils.FloatToBytes(dn, bytes, i); i += 4;
-                Utils.FloatToBytes(df, bytes, i); i += 4;
-                bytes[i++] = (byte)(ControlFrustum ? 1 : 0);
+            public override void ToBytes(byte[] bytes, ref int i)
+            {
+                ObjectID.ToBytes(bytes, i); i += 16;
             }
+
         }
 
-        public override int Length {
-            get {
+        public override int Length
+        {
+            get
+            {
                 int length = 10;
-                length += Frustum.Length;
+                length += ObjectData.Length;
                 return length;
             }
         }
-        public FrustumBlock Frustum;
+        public ObjectDataBlock ObjectData;
 
-        public SetFrustumPacket () {
+        public ClearWindowPacket()
+        {
             HasVariableBlocks = false;
-            //Type = PacketType.SetFollowCamProperties;
+            Type = PacketType.ClearFollowCamProperties;
             Header = new Header();
             Header.Frequency = PacketFrequency.Low;
             Header.ID = 428;
             Header.Reliable = true;
-            Frustum = new FrustumBlock();
+            ObjectData = new ObjectDataBlock();
         }
 
-        public SetFrustumPacket(bool enable)
+        public ClearWindowPacket(UUID id)
             : this() {
-
-            Frustum.ControlFrustum = enable;
+            ObjectData.ObjectID = id;
         }
 
-        public SetFrustumPacket(byte[] bytes, ref int i)
-            : this() {
+        public ClearWindowPacket(byte[] bytes, ref int i) : this()
+        {
             int packetEnd = bytes.Length - 1;
             FromBytes(bytes, ref i, ref packetEnd, null);
         }
 
-        override public void FromBytes(byte[] bytes, ref int i, ref int packetEnd, byte[] zeroBuffer) {
+        override public void FromBytes(byte[] bytes, ref int i, ref int packetEnd, byte[] zeroBuffer)
+        {
             Header.FromBytes(bytes, ref i, ref packetEnd);
-            if (Header.Zerocoded && zeroBuffer != null) {
+            if (Header.Zerocoded && zeroBuffer != null)
+            {
                 packetEnd = Helpers.ZeroDecode(bytes, packetEnd + 1, zeroBuffer) - 1;
                 bytes = zeroBuffer;
             }
-            Frustum.FromBytes(bytes, ref i);
+            ObjectData.FromBytes(bytes, ref i);
         }
 
-        public SetFrustumPacket(Header head, byte[] bytes, ref int i)
-            : this() {
+        public ClearWindowPacket(Header head, byte[] bytes, ref int i): this()
+        {
             int packetEnd = bytes.Length - 1;
             FromBytes(head, bytes, ref i, ref packetEnd);
         }
 
-        override public void FromBytes(Header header, byte[] bytes, ref int i, ref int packetEnd) {
+        override public void FromBytes(Header header, byte[] bytes, ref int i, ref int packetEnd)
+        {
             Header = header;
-            Frustum.FromBytes(bytes, ref i);
+            ObjectData.FromBytes(bytes, ref i);
         }
 
-        public override byte[] ToBytes() {
+        public override byte[] ToBytes()
+        {
             int length = 10;
-            length += Frustum.Length;
+            length += ObjectData.Length;
             if (Header.AckList != null && Header.AckList.Length > 0) { length += Header.AckList.Length * 4 + 1; }
             byte[] bytes = new byte[length];
             int i = 0;
             Header.ToBytes(bytes, ref i);
-            Frustum.ToBytes(bytes, ref i);
+            ObjectData.ToBytes(bytes, ref i);
             if (Header.AckList != null && Header.AckList.Length > 0) { Header.AcksToBytes(bytes, ref i); }
             return bytes;
         }
 
-        public override byte[][] ToBytesMultiple() {
+        public override byte[][] ToBytesMultiple()
+        {
             return new byte[][] { ToBytes() };
         }
     }
@@ -282,7 +318,7 @@ namespace ChimeraLib {
                 Vector3 rotatatedLookAt = ((window.EyePosition * new Vector3(1f, -1f, 1f)) / 1000f) * rotation.Quaternion;
                 position += rotatatedLookAt;
             }
-            Vector3 lookAt = position + finalRot.LookAtVector;
+            Vector3 focus = position + finalRot.LookAtVector;
             cameraPacket.CameraProperty[0].Value = 0;
             cameraPacket.CameraProperty[1].Value = 0f;
             cameraPacket.CameraProperty[2].Value = 0f;
@@ -300,20 +336,27 @@ namespace ChimeraLib {
             cameraPacket.CameraProperty[14].Value = position.Y;
             cameraPacket.CameraProperty[15].Value = position.Z;
             cameraPacket.CameraProperty[16].Value = 0f;
-            cameraPacket.CameraProperty[17].Value = lookAt.X;
-            cameraPacket.CameraProperty[18].Value = lookAt.Y;
-            cameraPacket.CameraProperty[19].Value = lookAt.Z;
+            cameraPacket.CameraProperty[17].Value = focus.X;
+            cameraPacket.CameraProperty[18].Value = focus.Y;
+            cameraPacket.CameraProperty[19].Value = focus.Z;
             cameraPacket.CameraProperty[20].Value = 1f;
             cameraPacket.CameraProperty[21].Value = 1f;
             return cameraPacket;
         }
 
-        public static SetFrustumPacket CreateFrustumPacket(this Window window, float vanishingPoint) {
+        public static SetWindowPacket CreateWindowPacket(this Window window, 
+            Vector3 position, 
+            Vector3 positionDelta, 
+            Rotation rotation, 
+            Vector3 lookAtDelta, 
+            uint tickLength) {
+
             Vector3 upperRight = new Vector3(0f, (float)(window.Width / 2.0), (float)(window.Height / 2.0));
             Vector3 lowerLeft = new Vector3(0f, (float)(window.Width / -2.0), (float)(window.Height / -2.0));
             Vector3 diff = window.ScreenPosition - window.EyePosition;
 
             diff *= -window.RotationOffset.Quaternion;
+            //diff *= window.RotationOffset.Quaternion;
 
             upperRight += diff;
             lowerLeft += diff;
@@ -323,39 +366,38 @@ namespace ChimeraLib {
             upperRight /= (float) (diff.X * 10.0);
             lowerLeft /= (float) (diff.X * 10.0);
 
-            SetFrustumPacket p = new SetFrustumPacket();
-            p.Frustum.x1 = Math.Min(upperRight.Y, lowerLeft.Y);
-            p.Frustum.x2 = Math.Max(upperRight.Y, lowerLeft.Y);
-            p.Frustum.y1 = Math.Max(upperRight.Z, lowerLeft.Z);
-            p.Frustum.y2 = Math.Min(upperRight.Z, lowerLeft.Z);
-            p.Frustum.dn = (diff.Length() / diff.X) * .1f;
-            p.Frustum.df = (vanishingPoint * 100f) * p.Frustum.dn;
-            p.Frustum.ControlFrustum = true;
+            float x1 = Math.Min(upperRight.Y, lowerLeft.Y);
+            float x2 = Math.Max(upperRight.Y, lowerLeft.Y);
+            float y1 = Math.Max(upperRight.Z, lowerLeft.Z);
+            float y2 = Math.Min(upperRight.Z, lowerLeft.Z);
+            float dn = (diff.Length() / diff.X) * .1f;
+            float df = (512f * 100f) * dn;
+
+            /*
+            SetFrustumPacket fp = window.CreateFrustumPacket(512f);
+            float x1 = fp.Frustum.x1;
+            float x2 = fp.Frustum.x2;
+            float y1 = fp.Frustum.y1;
+            float y2 = fp.Frustum.y2;
+            float dn = fp.Frustum.dn;
+            float df = fp.Frustum.df;
+            */
+
+            Vector3 lookAt = new Rotation(rotation.Pitch + window.RotationOffset.Pitch, rotation.Yaw + window.RotationOffset.Yaw).LookAtVector;
+
+            SetWindowPacket p = new SetWindowPacket();
+            p.Window.Position = position;
+            p.Window.PositionDelta = positionDelta;
+            p.Window.LookAt = lookAt;
+            p.Window.LookAtDelta = lookAtDelta;
+            p.Window.TickLength = tickLength * 1000;
+		    p.Window.ProjectionMatrix = new Matrix4(
+    			(2*dn) / (x2-x1),   0,              (x2+x1)/(x2-x1),   0,
+    			0,                  (2*dn)/(y1-y2), (y1+y2)/(y1-y2),   0,
+    			0,                  0,              -(df+dn)/(df-dn),   -(2.0f*df*dn)/(df-dn),
+    			0,                  0,              -1.0f,              0);
 
             return p;
-        }
-
-        public static SetCameraPropertiesPacket CreateCameraPacket(this Window window, bool updateFrustum = true, bool updateFoV = true, bool updateAspectRatio = true) {
-            SetCameraPropertiesPacket packet = new SetCameraPropertiesPacket();
-            packet.CameraProperty = new SetCameraPropertiesPacket.CameraPropertyBlock();
-            packet.CameraProperty.FrustumOffsetH = 0f;
-            packet.CameraProperty.FrustumOffsetV = 0f;
-            packet.CameraProperty.CameraAngle = 1f;
-
-            packet.CameraProperty.AspectRatio = (float)(window.Width / window.Height);
-            packet.CameraProperty.AspectSet = updateAspectRatio;
-
-            packet.CameraProperty.FrustumNear = .01f;
-            packet.CameraProperty.SetNear = false;
-
-            if (updateFrustum) {
-                packet.CameraProperty.FrustumOffsetH = (float)((2 * window.FrustumOffsetH) / window.Width);
-                packet.CameraProperty.FrustumOffsetV = (float)((2 * window.FrustumOffsetV) / window.Height);
-            }
-            if (updateFoV)
-                packet.CameraProperty.CameraAngle = (float)window.FieldOfView;
-
-            return packet;
         }
     }
 }

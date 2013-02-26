@@ -54,6 +54,21 @@ namespace FlythroughLib {
         /// </summary>
         private readonly string mName;
 
+        /// <summary>
+        /// Triggered whenever a new event is started. The bool is true if the event is from sequence one.
+        /// </summary>
+        public event System.Action<FlythroughEvent, bool> OnNextEvent;
+
+        /// <summary>
+        /// Triggered whenever this event starts playing.
+        /// </summary>
+        public event EventHandler OnStart;
+
+        /// <summary>
+        /// Triggered whenever this event finishes playing. True if sequence one is finishing, false if sequence two is finishing.
+        /// </summary>
+        public event System.Action<bool> OnComplete;
+
         public override int Length {
             get {
                 int stream1L = 0, stream2L = 0;
@@ -79,6 +94,22 @@ namespace FlythroughLib {
             get { return mName; }
         }
 
+        public FlythroughEvent Stream1Current {
+            get { return mStream1Current; }
+            set { 
+                if (CurrentStep == 0)
+                    mStream1Current = value;
+            }
+        }
+
+        public FlythroughEvent Stream2Current {
+            get { return mStream2Current; }
+            set { 
+                if (CurrentStep == 0)
+                    mStream2Current = value;
+            }
+        }
+
         /// <summary>
         /// Initialise with no events in the streams.
         /// </summary>
@@ -99,6 +130,7 @@ namespace FlythroughLib {
             else
                 mStream1Last.NextEvent = evt;
 
+            evt.PrevEvent = mStream1Last;
             mStream1Last = evt;
         }
 
@@ -112,6 +144,7 @@ namespace FlythroughLib {
             else
                 mStream2Last.NextEvent = evt;
 
+            evt.PrevEvent = mStream2Last;
             mStream2Last = evt;
         }
 
@@ -119,10 +152,15 @@ namespace FlythroughLib {
             if (CurrentStep == 0) {
                 mStream1Playing = mStream1First != null;
                 mStream2Playing = mStream2First != null;
-                mStream1Current = mStream1First;
-                mStream2Current = mStream2First;
+                if (mStream1Current == null)
+                    mStream1Current = mStream1First;
+                if (mStream2Current == null)
+                    mStream2Current = mStream2First;
 
                 DoStep();
+
+                if ((mStream1Playing || mStream2Playing) && OnStart != null)
+                    OnStart(this, null);
             }
 
             if (mStream1Playing && !mStream1Current.Step()) {
@@ -130,6 +168,10 @@ namespace FlythroughLib {
                 if (mStream1Current == null) {
                     mStream1Playing = false;
                     mStream1Current = null;
+                    if (OnComplete != null)
+                        OnComplete(false);
+                } else if (OnNextEvent != null) {
+                    OnNextEvent(mStream1Current, true);
                 }
             }
 
@@ -138,6 +180,10 @@ namespace FlythroughLib {
                 if (mStream2Current == null) {
                     mStream2Playing = false;
                     mStream2Current = null;
+                    if (OnComplete != null)
+                        OnComplete(false);
+                } else if (OnNextEvent != null) {
+                    OnNextEvent(mStream1Current, false);
                 }
             }
 
@@ -155,24 +201,34 @@ namespace FlythroughLib {
 
         public void MoveUp(FlythroughEvent evt) {
             if (evt.PrevEvent != null) {
-                if (evt.PrevEvent.PrevEvent != null)
-                    evt.PrevEvent.PrevEvent.NextEvent = evt;
+                FlythroughEvent one = evt.PrevEvent.PrevEvent;
+                FlythroughEvent two = evt;
+                FlythroughEvent three = evt.PrevEvent;
+                FlythroughEvent four = evt.NextEvent;
 
-                evt.PrevEvent = evt.PrevEvent.PrevEvent;
-                evt.NextEvent = evt.PrevEvent;
+                if (one != null)
+                    one.NextEvent = two;
 
-                if (evt.PrevEvent != null) {
-                    evt.PrevEvent.PrevEvent = evt;
-                    evt.PrevEvent.NextEvent = evt.NextEvent;
+                two.PrevEvent = one;
+                two.NextEvent = three;
+
+                if (three != null) {
+                    three.PrevEvent = two;
+                    three.NextEvent = four;
                 }
 
-                if (evt.NextEvent != null)
-                    evt.NextEvent.PrevEvent = evt.PrevEvent;
+                if (four != null)
+                    four.PrevEvent = three;
 
-                if (evt.PrevEvent == mStream1First)
+                if (three == mStream1First)
                     mStream1First = evt;
-                if (evt.PrevEvent == mStream2First)
+                if (three == mStream2First)
                     mStream2First = evt;
+
+                if (evt == mStream1Last)
+                    mStream1Last = evt.NextEvent;
+                if (evt == mStream2Last)
+                    mStream2Last = evt.NextEvent;
             }
         }
 
@@ -241,6 +297,18 @@ namespace FlythroughLib {
                 root.AppendChild(evt.Save(root.OwnerDocument));
                 evt = evt.NextEvent;
             }
+        }
+
+        public override void Reset() {
+            base.Reset();
+            if (mStream1Current != null)
+                mStream1Current.Reset();
+            if (mStream2Current != null)
+                mStream2Current.Reset();
+            mStream1Current = null;
+            mStream2Current = null;
+            mStream1Playing = false;
+            mStream2Playing = false;
         }
     }
 }

@@ -22,11 +22,15 @@ namespace FlythroughLib.Panels {
         public FlythroughPanel() {
             InitializeComponent();
 
-            mContainer.OnPositionChange += (source, args) => mMaster.Position = mContainer.Position;
-            mContainer.OnComplete += (source, args) => Invoke(new Action(() => playButton.Enabled = true));
-            mContainer.OnRotationChange += (source, args) => {
-                mMaster.Rotation.Pitch = mContainer.Rotation.Pitch;
-                mMaster.Rotation.Yaw = mContainer.Rotation.Yaw;
+            mContainer.OnComplete += (source, args) => {
+                if (loopCheck.Checked)
+                    mContainer.Play();
+                else
+                    Invoke(new Action(() => playButton.Enabled = true));
+            };
+
+            mContainer.OnChange += (source, args) => {
+                mMaster.Update(args.Position, args.PositionDelta, args.LookAt, args.LookAtDelta);
             };
         }
 
@@ -36,7 +40,7 @@ namespace FlythroughLib.Panels {
         }
 
         private void playButton_Click(object sender, EventArgs e) {
-            mContainer.Play(mMaster.Position, mMaster.Rotation);
+            mContainer.Play(mMaster.Position, new Rotation(mMaster.LookAt));
             playButton.Enabled = false;
         }
 
@@ -70,8 +74,9 @@ namespace FlythroughLib.Panels {
             mPanels.Add(evt.Name, panel);
             eventsList.Items.Add(evt.Name);
 
-            int left = eventsList.Width + eventsList.Location.X;
-            panel.Size = new System.Drawing.Size(Width - left, Height);
+            int padding = 10;
+            int left = eventsList.Width + eventsList.Location.X + padding;
+            panel.Size = new System.Drawing.Size(Width - left, Height - playButton.Height);
             panel.Location = new Point(left, 0);
             panel.Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top | AnchorStyles.Bottom;
             Controls.Add(panel);
@@ -152,6 +157,26 @@ namespace FlythroughLib.Panels {
             if (saveSequenceDialog.ShowDialog(this) == DialogResult.OK) {
                 mContainer.Save(saveSequenceDialog.FileName);
             }
+        }
+
+        private void pauseButton_Click(object sender, EventArgs e) {
+            if (pauseButton.Text.Equals("Pause")) {
+                mContainer.Pause();
+                pauseButton.Text = "Restart";
+            } else {
+                mContainer.Play();
+                pauseButton.Text = "Pause";
+            }
+        }
+
+        private void resetButton_Click(object sender, EventArgs e) {
+            mContainer.Reset();
+            playButton.Enabled = true;
+            pauseButton.Text = "Pause";
+        }
+
+        private void resetCurrentButton_Click(object sender, EventArgs e) {
+            mContainer.ResetCurrent();
         }
     }
 }
