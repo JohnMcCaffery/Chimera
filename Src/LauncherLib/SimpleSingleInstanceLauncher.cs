@@ -138,7 +138,7 @@ namespace Chimera.Launcher {
             mCoordinator.StateManager.AddState(structuredFlythrough);
             mCoordinator.StateManager.AddState(slideshow);
             mCoordinator.StateManager.AddState(learn);
-            mCoordinator.StateManager.CurrentState = splash;
+            //mCoordinator.StateManager.CurrentState = splash;
             //mCoordinator.StateManager.CurrentState = helpFlycam;
             //mCoordinator.StateManager.CurrentState = kinectFlycam;
 
