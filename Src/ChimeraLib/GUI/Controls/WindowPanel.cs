@@ -136,7 +136,7 @@ namespace Chimera.GUI.Controls {
             };
 
             if (InvokeRequired)
-                Invoke(a);
+                BeginInvoke(a);
             else
                 a();
         }

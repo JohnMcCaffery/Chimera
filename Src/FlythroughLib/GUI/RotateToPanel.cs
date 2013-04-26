@@ -30,7 +30,7 @@ namespace Chimera.Flythrough.GUI {
                 mEvent.Container.Coordinator.Update(mEvent.Container.Coordinator.Position, Vector3.Zero, rotationPanel.Value, Rotation.Zero);
             };
             evt.TimeChange += (source, args) => {
-                Invoke(new Action(() => {
+                BeginInvoke(new Action(() => {
                     progressBar.Maximum = evt.Length;
                     progressBar.Value = evt.Time;
                 }));

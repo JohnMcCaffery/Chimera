@@ -1,0 +1,36 @@
+<Events StartPosition="&lt;238.2632, 218.3613, 70.38673&gt;" StartPitch="24.0000006678608" StartYaw="-130.000015001228">
+  <ComboEvent Name="Step 1">
+    <PositionSequence>
+      <MoveToEvent Name="Move To 1" Target="&lt;107.4696, 165.3668, 41.31437&gt;" Length="5000" />
+      <MoveToEvent Name="Move To 2" Target="&lt;77.41673, 114.065, 54.51442&gt;" Length="5000" />
+      <MoveToEvent Name="Move To 3" Target="&lt;97.99209, 18.74225, 112.9417&gt;" Length="5000" />
+      <MoveToEvent Name="Move To 4" Target="&lt;238.9402, 10.63256, 37.6031&gt;" Length="5000" />
+      <MoveToEvent Name="Move To 5" Target="&lt;233.8694, 88.18503, 43.58346&gt;" Length="5000" />
+    </PositionSequence>
+    <OrientationSequence>
+      <LookAtEvent Name="Look At 1" Target="&lt;198.731, 99.19788, 48.46668&gt;" Length="25000" />
+    </OrientationSequence>
+  </ComboEvent>
+  <ComboEvent Name="Step 2">
+    <PositionSequence>
+      <MoveToEvent Name="Move To 6" Target="&lt;229.8228, 96.51952, 38.62115&gt;" Length="1000" />
+      <MoveToEvent Name="Move To 7" Target="&lt;216.2221, 116.6753, 36.64994&gt;" Length="5000" />
+      <MoveToEvent Name="Move To 8" Target="&lt;151.4605, 125.357, 38.02683&gt;" Length="5000" />
+      <MoveToEvent Name="Move To 9" Target="&lt;159.7672, 107.8225, 38&gt;" Length="5000" />
+      <MoveToEvent Name="Move To 10" Target="&lt;159.1405, 102, 37.04822&gt;" Length="5000" />
+      <MoveToEvent Name="Move To 11" Target="&lt;172.6034, 100.0865, 37.04234&gt;" Length="5000" />
+      <MoveToEvent Name="Move To 12" Target="&lt;205.8003, 99.73905, 41.19696&gt;" Length="10000" />
+      <BlankEvent Length="5000" />
+    </PositionSequence>
+    <OrientationSequence>
+      <RotateToEvent Name="Rotate To 1" Pitch="-9.17273914965202" Yaw="177.398672822044" Length="1000" />
+      <RotateToEvent Name="Rotate To 2" Pitch="-1.55393804561689" Yaw="-157.00171988477" Length="5000" />
+      <RotateToEvent Name="Rotate To 3" Pitch="4.84606147791954" Yaw="-43.4017164958886" Length="5000" />
+      <RotateToEvent Name="Rotate To 4" Pitch="7.64606178500491" Yaw="-91.4017144165157" Length="5000" />
+      <RotateToEvent Name="Rotate To 5" Pitch="-1.55393516413084" Yaw="-11.4016919843366" Length="5000" />
+      <RotateToEvent Name="Rotate To 6" Pitch="4.84601110527441" Yaw="-3.00168692676419" Length="5000" />
+      <RotateToEvent Name="Rotate To 7" Pitch="13.2460471121415" Yaw="175.79827753724" Length="5000" />
+      <BlankEvent Length="5000" />
+    </OrientationSequence>
+  </ComboEvent>
+</Events>

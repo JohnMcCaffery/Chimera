@@ -121,7 +121,7 @@ namespace Chimera.GUI.Forms {
             if (!InvokeRequired)
                 a();
             else if (Created && !IsDisposed && !Disposing)
-                base.Invoke(a);
+                base.BeginInvoke(a);
         }
 
         internal void ForceRedraw() {
