@@ -32,7 +32,7 @@
             this.yPerspectiveButton = new System.Windows.Forms.RadioButton();
             this.zPerspectiveButton = new System.Windows.Forms.RadioButton();
             this.xPerspectiveButton = new System.Windows.Forms.RadioButton();
-            this.button1 = new System.Windows.Forms.Button();
+            this.testButton2 = new System.Windows.Forms.Button();
             this.testButton = new System.Windows.Forms.Button();
             this.realSpacePanel = new System.Windows.Forms.PictureBox();
             this.realSpaceScale = new System.Windows.Forms.TrackBar();
@@ -52,6 +52,7 @@
             this.inputsGroup = new System.Windows.Forms.GroupBox();
             this.inputsTab = new System.Windows.Forms.TabControl();
             this.statisticsTab = new System.Windows.Forms.TabPage();
+            this.overlayStatsBox = new System.Windows.Forms.RichTextBox();
             this.tickCountLabel = new System.Windows.Forms.Label();
             this.shortestWorkLabel = new System.Windows.Forms.Label();
             this.longestWorkLabel = new System.Windows.Forms.Label();
@@ -60,7 +61,6 @@
             this.shortestTickLabel = new System.Windows.Forms.Label();
             this.meanTickLabel = new System.Windows.Forms.Label();
             this.tpsLabel = new System.Windows.Forms.Label();
-            this.overlayStatsBox = new System.Windows.Forms.RichTextBox();
             ((System.ComponentModel.ISupportInitialize)(this.hSplit)).BeginInit();
             this.hSplit.Panel1.SuspendLayout();
             this.hSplit.Panel2.SuspendLayout();
@@ -86,7 +86,6 @@
             this.windowsPluginsSplit.SuspendLayout();
             this.windowsGroup.SuspendLayout();
             this.inputsGroup.SuspendLayout();
-            this.inputsTab.SuspendLayout();
             this.statisticsTab.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -153,7 +152,7 @@
             this.realSpaceGroup.Controls.Add(this.yPerspectiveButton);
             this.realSpaceGroup.Controls.Add(this.zPerspectiveButton);
             this.realSpaceGroup.Controls.Add(this.xPerspectiveButton);
-            this.realSpaceGroup.Controls.Add(this.button1);
+            this.realSpaceGroup.Controls.Add(this.testButton2);
             this.realSpaceGroup.Controls.Add(this.testButton);
             this.realSpaceGroup.Controls.Add(this.realSpacePanel);
             this.realSpaceGroup.Controls.Add(this.realSpaceScale);
@@ -203,14 +202,15 @@
             this.xPerspectiveButton.UseVisualStyleBackColor = true;
             this.xPerspectiveButton.CheckedChanged += new System.EventHandler(this.PerspectiveButton_CheckedChanged);
             // 
-            // button1
+            // testButton2
             // 
-            this.button1.Location = new System.Drawing.Point(6, 48);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(91, 23);
-            this.button1.TabIndex = 2;
-            this.button1.Text = "Crash - Thread";
-            this.button1.UseVisualStyleBackColor = true;
+            this.testButton2.Location = new System.Drawing.Point(6, 48);
+            this.testButton2.Name = "testButton2";
+            this.testButton2.Size = new System.Drawing.Size(91, 23);
+            this.testButton2.TabIndex = 2;
+            this.testButton2.Text = "Crash - Thread";
+            this.testButton2.UseVisualStyleBackColor = true;
+            this.testButton2.Click += new System.EventHandler(this.testButton2_Click);
             // 
             // testButton
             // 
@@ -220,6 +220,7 @@
             this.testButton.TabIndex = 1;
             this.testButton.Text = "Crash - GUI";
             this.testButton.UseVisualStyleBackColor = true;
+            this.testButton.Click += new System.EventHandler(this.testButton_Click);
             // 
             // realSpacePanel
             // 
@@ -462,7 +463,6 @@
             // 
             // inputsTab
             // 
-            //this.inputsTab.Controls.Add(this.statisticsTab);
             this.inputsTab.Dock = System.Windows.Forms.DockStyle.Fill;
             this.inputsTab.Location = new System.Drawing.Point(3, 16);
             this.inputsTab.Name = "inputsTab";
@@ -490,6 +490,18 @@
             this.statisticsTab.TabIndex = 0;
             this.statisticsTab.Text = "Statistics";
             this.statisticsTab.UseVisualStyleBackColor = true;
+            // 
+            // overlayStatsBox
+            // 
+            this.overlayStatsBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                        | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.overlayStatsBox.Enabled = false;
+            this.overlayStatsBox.Location = new System.Drawing.Point(111, -2);
+            this.overlayStatsBox.Name = "overlayStatsBox";
+            this.overlayStatsBox.Size = new System.Drawing.Size(334, 450);
+            this.overlayStatsBox.TabIndex = 8;
+            this.overlayStatsBox.Text = "";
             // 
             // tickCountLabel
             // 
@@ -563,18 +575,6 @@
             this.tpsLabel.TabIndex = 0;
             this.tpsLabel.Text = "Ticks / Second";
             // 
-            // overlayStatsBox
-            // 
-            this.overlayStatsBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
-            this.overlayStatsBox.Enabled = false;
-            this.overlayStatsBox.Location = new System.Drawing.Point(111, -2);
-            this.overlayStatsBox.Name = "overlayStatsBox";
-            this.overlayStatsBox.Size = new System.Drawing.Size(334, 450);
-            this.overlayStatsBox.TabIndex = 8;
-            this.overlayStatsBox.Text = "";
-            // 
             // CoordinatorForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -614,10 +614,10 @@
             this.windowsPluginsSplit.ResumeLayout(false);
             this.windowsGroup.ResumeLayout(false);
             this.inputsGroup.ResumeLayout(false);
-            this.inputsTab.ResumeLayout(false);
             this.statisticsTab.ResumeLayout(false);
             this.statisticsTab.PerformLayout();
             this.ResumeLayout(false);
+
         }
 
         #endregion
@@ -636,7 +636,7 @@
         private System.Windows.Forms.Button triggerHelpButton;
         private System.Windows.Forms.SplitContainer diagSplit;
         private System.Windows.Forms.GroupBox realSpaceGroup;
-        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button testButton2;
         private System.Windows.Forms.Button testButton;
         private System.Windows.Forms.GroupBox virtualSpaceGroup;
         private System.Windows.Forms.PictureBox heightmapPanel;

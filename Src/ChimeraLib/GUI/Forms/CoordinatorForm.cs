@@ -378,7 +378,7 @@ namespace Chimera.GUI.Forms {
             }
         }
 
-        private void button1_Click(object sender, EventArgs e) {
+        private void testButton2_Click(object sender, EventArgs e) {
             new Thread(() => { throw new Exception("Crashy crashy. Not transition GUI."); }).Start();
         }
 
