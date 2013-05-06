@@ -262,7 +262,7 @@ namespace Chimera.OpenSim {
                     if (mControlCamera && mWindow.Coordinator.ControlMode == ControlMode.Absolute)
                         SetCamera();
                     SetWindow();
-                    if (mFollowCamProperties.SendPackets)
+                    if (mMaster && mFollowCamProperties.SendPackets)
                         mProxy.InjectPacket(mFollowCamProperties.Packet, Direction.Incoming);
                     if (OnClientLoggedIn != null)
                         OnClientLoggedIn(mProxy, null);
@@ -513,6 +513,8 @@ namespace Chimera.OpenSim {
                 if (mInputPanel == null) {
                     mMaster = true;
                     mFollowCamProperties = new SetFollowCamProperties(Window.Coordinator);
+                    if (mProxy != null)
+                        mFollowCamProperties.SetProxy(mProxy);
                     mInputPanel = new InputPanel(mFollowCamProperties);
 
                 }
@@ -626,7 +628,8 @@ namespace Chimera.OpenSim {
             if (mMaster && coordinator.ControlMode == ControlMode.Delta && mProxy != null) {
                 RemoteControlPacket packet = new RemoteControlPacket();
                 packet.Delta.Position = args.positionDelta * mDeltaScale;
-                packet.Delta.Pitch = (float) (args.rotationDelta.Pitch * (Math.PI / 45.0)) * mDeltaScale;
+                //packet.Delta.Pitch = (float) (args.rotationDelta.Pitch * (Math.PI / 45.0)) * mDeltaScale;
+                packet.Delta.Pitch = 0f;
                 packet.Delta.Yaw = (float) (args.rotationDelta.Yaw * (Math.PI / 45.0)) * mDeltaScale;
                 mProxy.InjectPacket(packet, Direction.Incoming);
                 

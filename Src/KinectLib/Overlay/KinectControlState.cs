@@ -65,7 +65,8 @@ namespace Chimera.Kinect.Overlay {
         protected override void TransitionFromStart() { 
             mInput.FlyEnabled = false;
             mInput.WalkEnabled = false;
-            mInput.YawEnabled = false;       
+            mInput.YawEnabled = false;
+            Manager.Coordinator.Update(Manager.Coordinator.Position, Vector3.Zero, Manager.Coordinator.Orientation, Rotation.Zero);
         }
 
         public override void TransitionToStart() {
