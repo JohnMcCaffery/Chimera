@@ -209,7 +209,6 @@ namespace Chimera.Launcher {
         public static Launcher Create() {
             //Assembly ass = typeof(Launcher).Assembly;
             //return (Launcher) ass.CreateInstance(new LauncherConfig().Launcher);
-
             switch (new LauncherConfig().Launcher) {
                 case "Chimera.Launcher.ExampleOverlayLauncher": return new ExampleOverlayLauncher();
             }
