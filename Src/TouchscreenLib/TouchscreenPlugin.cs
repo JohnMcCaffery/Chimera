@@ -7,6 +7,8 @@ using Chimera.Plugins;
 using Chimera.Overlay;
 using Chimera.GUI.Forms;
 using Touchscreen.GUI;
+using System.Threading;
+using System.Windows.Forms;
 
 namespace Touchscreen {
     public enum SinglePos {
@@ -35,20 +37,43 @@ namespace Touchscreen {
             set { mSinglePos = value; }
         }
 
+        private bool mClose = false;
+        private object mCloseLock = new object();
+
         public override bool Enabled {
             get { return base.Enabled; }
             set {
                 base.Enabled = value;
                 if (value && mManager != null) {
-                    mWindow = new TouchscreenForm(this);
-                    mWindow.Opacity = mConfig.Opacity;
-                    mWindow.Bounds = mManager.Window.Monitor.Bounds;
-                    mWindow.MouseDown += new System.Windows.Forms.MouseEventHandler(mWindow_MouseDown);
-                    mWindow.MouseUp += new System.Windows.Forms.MouseEventHandler(mWindow_MouseUp); mWindow.Show();
-                    mWindow.Show();
+                    //Thread overlay = new Thread(() => {
+                        mWindow = new TouchscreenForm(this);
+                        mWindow.Opacity = mConfig.Opacity;
+                        mWindow.Bounds = mManager.Window.Monitor.Bounds;
+                        mWindow.MouseDown += new System.Windows.Forms.MouseEventHandler(mWindow_MouseDown);
+                        mWindow.MouseUp += new System.Windows.Forms.MouseEventHandler(mWindow_MouseUp); mWindow.Show();
+                        mWindow.Show();
+
+                        /*
+                        mClose = false;
+                        //Application.Run(mWindow);
+                        while (!mClose) {
+                            lock (mCloseLock)
+                                Monitor.Wait(mCloseLock, 1000);
+                        }
+                        mWindow.Close();
+                        mWindow = null;
+                    });
+                    overlay.Name = "Touchscreen overlay";
+                    overlay.SetApartmentState(ApartmentState.STA);
+                    overlay.Start();
+                        */
                 } else if (mWindow != null) {
                     mWindow.Close();
-                    mWindow = null;
+                    /*
+                    mClose = true;
+                    lock (mCloseLock)
+                        Monitor.PulseAll(mCloseLock);
+                    */
                 }
             }
         }

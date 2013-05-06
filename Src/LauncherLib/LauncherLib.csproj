@@ -68,6 +68,7 @@
     <Compile Include="ExampleOverlayLauncher.cs" />
     <Compile Include="Launcher.cs" />
     <Compile Include="MinimumLauncher.cs" />
+    <Compile Include="LaunchConfig.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TimespanLauncher.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">
