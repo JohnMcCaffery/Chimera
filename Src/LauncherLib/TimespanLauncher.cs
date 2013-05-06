@@ -42,19 +42,12 @@ namespace Chimera.Launcher {
         protected override void InitOverlay() {
             Window mainWindow = Coordinator["MainWindow"];
 
-            DialRenderer dialRenderer = new DialRenderer();
-            CursorRenderer cursorRenderer = new DialCursorRenderer(dialRenderer, mainWindow.OverlayManager);
-            //CursorTrigger t = new CursorTrigger(new CircleRenderer(100), mainWindow);
-
             Font font = new Font("Verdana", 52, FontStyle.Bold);
             Rectangle clip = new Rectangle(0, 0, 1920, 1080);
 
-            ITrigger slideshowNext = new ImageHoverTrigger(mainWindow.OverlayManager, cursorRenderer, 
-                new OverlayImage(new Bitmap("../Images/Caen/Buttons/NextTrans.png"), .85f, .85f, mainWindow.Name));
-            ITrigger slideshowPrev = new ImageHoverTrigger(mainWindow.OverlayManager, cursorRenderer, 
-                new OverlayImage(new Bitmap("../Images/Caen/Buttons/PrevTrans.png"), .05f, .85f, mainWindow.Name));
-            ITrigger flythroughNext = new ImageHoverTrigger(mainWindow.OverlayManager, cursorRenderer, 
-                new OverlayImage(new Bitmap("../Images/Caen/Buttons/Next.png"), .85f, .85f, mainWindow.Name));
+            ITrigger slideshowNext = ImgTrigger(mainWindow, "NextTrans", .85f, .85f);
+            ITrigger slideshowPrev = ImgTrigger(mainWindow, "PrevTrans", .85f, .85f);
+            ITrigger flythroughNext = ImgTrigger(mainWindow, "Next", .85f, .85f);
 
             IImageTransitionFactory fade = new FadeFactory();
             CutWindowTransitionFactory cutTransition = new CutWindowTransitionFactory();
@@ -62,12 +55,12 @@ namespace Chimera.Launcher {
             OpacityFadeOutTransitionFactory fadeOutTransition = new OpacityFadeOutTransitionFactory(1500.0);
             OpacityFadeInTransitionFactory fadeInTransition = new OpacityFadeInTransitionFactory(1500.0);
 
-            State splash = new ImageBGState("SplashScreen", Coordinator.StateManager, "../Images/Caen/MenuBGs/Caen-Splash.png");
+            State splash = new ImageBGState("Splash", Coordinator.StateManager, "../Images/Caen/MenuBGs/Caen-Splash.png");
             State kinectAvatar = new KinectControlState("KinectControlAvatar", Coordinator.StateManager, true);
             State kinectFlycam = new KinectControlState("KinectControlFlycam", Coordinator.StateManager, false);
             State helpAvatar = new KinectHelpState("KinectHelpAvatar", Coordinator.StateManager, mainWindow.Name, mainWindow.Name);
             State helpFlycam = new KinectHelpState("KinectHelpFlycam", Coordinator.StateManager, mainWindow.Name, mainWindow.Name);
-            State idleFlythrough = new FlythroughState("IdleFlythrough", Coordinator.StateManager, "../Flythroughs/Caen-long.xml");
+            State idleFlythrough = new FlythroughState("Idle", Coordinator.StateManager, "../Flythroughs/Caen-long.xml");
             State slideshow = new SlideshowState("Slideshow", Coordinator.StateManager, "../Images/Caen/TodaySlideshow", slideshowNext, slideshowPrev, fade, 1500);
             State structuredFlythrough = new FlythroughState("StructuredFlythrough", Coordinator.StateManager, "../Flythroughs/Caen-Guided.xml", flythroughNext);
 
