@@ -36,6 +36,7 @@ using Chimera.Plugins;
 using Joystick;
 using Chimera.Kinect.GUI;
 using Chimera.Flythrough;
+using Touchscreen.Overlay;
 
 namespace Chimera.Launcher {
     public class TimespanLauncher : Launcher{
@@ -46,7 +47,7 @@ namespace Chimera.Launcher {
             Rectangle clip = new Rectangle(0, 0, 1920, 1080);
 
             ITrigger slideshowNext = ImgTrigger(mainWindow, "NextTrans", .85f, .85f);
-            ITrigger slideshowPrev = ImgTrigger(mainWindow, "PrevTrans", .85f, .85f);
+            ITrigger slideshowPrev = ImgTrigger(mainWindow, "PrevTrans", .85f, .05f);
             ITrigger flythroughNext = ImgTrigger(mainWindow, "Next", .85f, .85f);
 
             IImageTransitionFactory fade = new FadeFactory();
@@ -56,10 +57,19 @@ namespace Chimera.Launcher {
             OpacityFadeInTransitionFactory fadeInTransition = new OpacityFadeInTransitionFactory(1500.0);
 
             State splash = new ImageBGState("Splash", Coordinator.StateManager, "../Images/Caen/MenuBGs/Caen-Splash.png");
-            State kinectAvatar = new KinectControlState("KinectControlAvatar", Coordinator.StateManager, true);
-            State kinectFlycam = new KinectControlState("KinectControlFlycam", Coordinator.StateManager, false);
-            State helpAvatar = new KinectHelpState("KinectHelpAvatar", Coordinator.StateManager, mainWindow.Name, mainWindow.Name);
-            State helpFlycam = new KinectHelpState("KinectHelpFlycam", Coordinator.StateManager, mainWindow.Name, mainWindow.Name);
+            State controlAvatar;
+            State controlFlycam;
+            State helpAvatar = null;
+            State helpFlycam = null;
+            if (Config.UseClicks) {
+                controlAvatar = new TouchscreenState("TouchscreenAvatar", true, Coordinator);
+                controlFlycam = new TouchscreenState("TouchscreenFlycam", false, Coordinator);
+            } else {
+                controlAvatar = new KinectControlState("KinectControlAvatar", Coordinator.StateManager, true);
+                controlFlycam = new KinectControlState("KinectControlFlycam", Coordinator.StateManager, false);
+                helpAvatar = new KinectHelpState("KinectHelpAvatar", Coordinator.StateManager, mainWindow.Name, mainWindow.Name);
+                helpFlycam = new KinectHelpState("KinectHelpFlycam", Coordinator.StateManager, mainWindow.Name, mainWindow.Name);
+            }
             State idleFlythrough = new FlythroughState("Idle", Coordinator.StateManager, "../Flythroughs/Caen-long.xml");
             State slideshow = new SlideshowState("Slideshow", Coordinator.StateManager, "../Images/Caen/TodaySlideshow", slideshowNext, slideshowPrev, fade, 1500);
             State structuredFlythrough = new FlythroughState("StructuredFlythrough", Coordinator.StateManager, "../Flythroughs/Caen-Guided.xml", flythroughNext);
@@ -76,10 +86,15 @@ namespace Chimera.Launcher {
             State storyFisherman = new OverlayVideoState("Story4", mainWindow.OverlayManager, "../../Videos/fisherman.mp4", splash, fadeTransition);
             State storyWolf = new OverlayVideoState("Story5", mainWindow.OverlayManager, "../../Videos/wolf.mp4", splash, fadeTransition);
 
-            ImgTrans(helpAvatar,    kinectAvatar,           "HelpToWorld",          .85f, .15f, .1f, mainWindow, fadeOutTransition);
-            ImgTrans(helpFlycam,    kinectFlycam,           "HelpToWorld",          .85f, .15f, .1f, mainWindow, fadeOutTransition);
-            ImgTrans(helpAvatar,    splash,                 "MainMenu",             .85f, .35f, .1f, mainWindow, fadeTransition);
-            ImgTrans(helpFlycam,    splash,                 "MainMenu",             .85f, .35f, .1f, mainWindow, fadeTransition);
+            if (Config.UseClicks) {
+                ImgTrans(controlAvatar, splash, "MainMenu", .85f, .80f, .1f, mainWindow, fadeTransition);
+                ImgTrans(controlFlycam, splash, "MainMenu", .85f, .80f, .1f, mainWindow, fadeTransition);
+            } else {
+                ImgTrans(helpAvatar, controlAvatar, "HelpToWorld", .85f, .15f, .1f, mainWindow, fadeOutTransition);
+                ImgTrans(helpFlycam, controlFlycam, "HelpToWorld", .85f, .15f, .1f, mainWindow, fadeOutTransition);
+                ImgTrans(helpAvatar, splash, "MainMenu", .85f, .35f, .1f, mainWindow, fadeTransition);
+                ImgTrans(helpFlycam, splash, "MainMenu", .85f, .35f, .1f, mainWindow, fadeTransition);
+            }
 
             ImgTrans(structuredFlythrough,  splash,         "Back",                 .05f, .85f, mainWindow, fadeTransition);
             ImgTrans(slideshow,  splash,                    "BackTrans",            .45f, .85f, mainWindow, fadeTransition);
@@ -101,31 +116,33 @@ namespace Chimera.Launcher {
             InvisTrans(confirmWolf, storyWolf,           new Point(960,380), new Point(1410,665), clip, mainWindow, fadeTransition);
 
             InvisTrans(splash, structuredFlythrough,    new Point(1080,415), new Point(1755,500), clip, mainWindow, fadeOutTransition);
-            InvisTrans(splash, kinectAvatar,            new Point(1080,535), new Point(1755,620), clip, mainWindow, fadeOutTransition);
+            InvisTrans(splash, controlAvatar,            new Point(1080,535), new Point(1755,620), clip, mainWindow, fadeOutTransition);
             InvisTrans(splash, slideshow,               new Point(1080,645), new Point(1755,735), clip, mainWindow, fadeTransition);
-            InvisTrans(splash, kinectFlycam,            new Point(1080,765), new Point(1755,865), clip, mainWindow, fadeOutTransition);
+            InvisTrans(splash, controlFlycam,            new Point(1080,765), new Point(1755,865), clip, mainWindow, fadeOutTransition);
 
             ITrigger customTriggerHelp = new CustomTriggerTrigger(Coordinator.StateManager, "Help");
 
-            StateTransition kinectHelpAvatarTransition = new StateTransition(Coordinator.StateManager, kinectAvatar, helpAvatar, customTriggerHelp, fadeInTransition);
-            StateTransition kinectHelpFlycamTransition = new StateTransition(Coordinator.StateManager, kinectFlycam, helpFlycam, customTriggerHelp, fadeInTransition);
-           
+            if (!Config.UseClicks) {
+                StateTransition kinectHelpAvatarTransition = new StateTransition(Coordinator.StateManager, controlAvatar, helpAvatar, customTriggerHelp, fadeInTransition);
+                StateTransition kinectHelpFlycamTransition = new StateTransition(Coordinator.StateManager, controlFlycam, helpFlycam, customTriggerHelp, fadeInTransition);
+                controlAvatar.AddTransition(kinectHelpAvatarTransition);
+                controlFlycam.AddTransition(kinectHelpFlycamTransition);
 
-            kinectAvatar.AddTransition(kinectHelpAvatarTransition);
-            kinectFlycam.AddTransition(kinectHelpFlycamTransition);
+                SkeletonFeature splashSkeleton = new SkeletonFeature(940, 1470, 1000, 100f, mainWindow.Name, clip);
+                splash.AddFeature(splashSkeleton);
 
-            SkeletonFeature splashSkeleton = new SkeletonFeature(940, 1470, 1000, 100f, mainWindow.Name, clip);
-            splash.AddFeature(splashSkeleton);
-
-            FadingText raiseHandText = new FadingText("Stretch your arm above your head for help", 30000, 30000, mainWindow.Name, Color.Red, font, 150, 30, clip);
-            kinectAvatar.AddFeature(raiseHandText);
-            kinectFlycam.AddFeature(raiseHandText);
+                FadingText raiseHandText = new FadingText("Stretch your arm above your head for help", 30000, 30000, mainWindow.Name, Color.Red, font, 150, 30, clip);
+                controlAvatar.AddFeature(raiseHandText);
+                controlFlycam.AddFeature(raiseHandText);
+            }
 
             Coordinator.StateManager.AddState(splash);
-            Coordinator.StateManager.AddState(kinectAvatar);
-            Coordinator.StateManager.AddState(kinectFlycam);
-            Coordinator.StateManager.AddState(helpAvatar);
-            Coordinator.StateManager.AddState(helpFlycam);
+            Coordinator.StateManager.AddState(controlAvatar);
+            Coordinator.StateManager.AddState(controlFlycam);
+            if (!Config.UseClicks) {
+                Coordinator.StateManager.AddState(helpAvatar);
+                Coordinator.StateManager.AddState(helpFlycam);
+            }
             Coordinator.StateManager.AddState(slideshow);
             Coordinator.StateManager.AddState(structuredFlythrough);
             Coordinator.StateManager.AddState(idleFlythrough);

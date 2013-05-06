@@ -190,8 +190,13 @@ namespace Chimera.Launcher {
         }
 
         public static Launcher Create() {
-            Assembly ass = typeof(Launcher).Assembly;
-            return (Launcher) ass.CreateInstance(new LauncherConfig().Launcher);
+            //Assembly ass = typeof(Launcher).Assembly;
+            //return (Launcher) ass.CreateInstance(new LauncherConfig().Launcher);
+            switch (new LauncherConfig().Launcher) {
+                case "Chimera.Launcher.ExampleOverlayLauncher": return new ExampleOverlayLauncher();
+                case "Chimera.Launcher.TimespanLauncher": return new TimespanLauncher();
+            }
+            return new MinimumLauncher();
         }
     }
 }
