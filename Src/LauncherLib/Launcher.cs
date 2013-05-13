@@ -39,6 +39,8 @@ using Chimera.Kinect.GUI;
 using Chimera.Kinect;
 using System.IO;
 using System.Reflection;
+using Chimera.Util;
+using System.Threading;
 
 namespace Chimera.Launcher {
     public abstract class Launcher {
@@ -197,7 +199,21 @@ namespace Chimera.Launcher {
                 case "Chimera.Launcher.TimespanLauncher": return new TimespanLauncher();
                 case "Chimera.Launcher.FlythroughLauncher": return new FlythroughLauncher();
             }
+
             return new MinimumLauncher();
+        }
+
+        public void Launch() {
+            if (mConfig.GUI)
+                ProcessWrangler.BlockingRunForm(Form, Coordinator);
+            else {
+                //Thread t = new Thread(() => {
+                while (!Console.ReadLine().ToUpper().StartsWith("Q")) ;
+                mCoordinator.Close();
+                //});
+                //t.Name = "Input Thread";
+                //t.Start();
+            }
         }
     }
 }

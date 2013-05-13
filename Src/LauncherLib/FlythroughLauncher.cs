@@ -8,7 +8,7 @@ using Chimera.Flythrough.Overlay;
 namespace Chimera.Launcher {
     public class FlythroughLauncher : Launcher {
         protected override void InitOverlay() {
-            State idleFlythrough = new FlythroughState("Flythrough", Coordinator.StateManager, "../Flythroughs/Cathedral.xml");
+            State idleFlythrough = new FlythroughState("Flythrough", Coordinator.StateManager, "../Flythroughs/Cathedral5.xml");
 
             Coordinator.StateManager.AddState(idleFlythrough);
         }
