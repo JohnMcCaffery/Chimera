@@ -37,6 +37,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Config", "Config", "{AD5F2E
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TouchscreenLib", "TouchscreenLib\TouchscreenLib.csproj", "{7780A366-F9CE-4E9F-8C91-0763F73A3A8A}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Startup", "Startup", "{73DB0B33-214A-497D-A867-ADFEEE80C05B}"
+	ProjectSection(SolutionItems) = preProject
+		..\install.bat = ..\install.bat
+		..\launch.bat = ..\launch.bat
+		..\shutdown1.vbs = ..\shutdown1.vbs
+		..\shutdown2.vbs = ..\shutdown2.vbs
+		..\startup.bat = ..\startup.bat
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

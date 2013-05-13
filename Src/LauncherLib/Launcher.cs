@@ -211,6 +211,8 @@ namespace Chimera.Launcher {
             //return (Launcher) ass.CreateInstance(new LauncherConfig().Launcher);
             switch (new LauncherConfig().Launcher) {
                 case "Chimera.Launcher.ExampleOverlayLauncher": return new ExampleOverlayLauncher();
+                case "Chimera.Launcher.TimespanLauncher": return new TimespanLauncher();
+                case "Chimera.Launcher.FlythroughLauncher": return new FlythroughLauncher();
             }
 
             return new MinimumLauncher();
