@@ -39,8 +39,6 @@ using Touchscreen;
 
 namespace Chimera.Launcher {
     public class MinimumLauncher : Launcher {
-
-        protected override void InitOverlay() {
-        }
+        protected override void InitOverlay() { }
     }
 }
