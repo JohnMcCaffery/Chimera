@@ -1511,16 +1511,17 @@ namespace Chimera.Util {
         }
 
         public static void Dump(string dump, string end) {
-            string t = DateTime.Now.ToString("dd-HH.mm");
-            string y = DateTime.Now.ToString("yyyy");
-            string m = DateTime.Now.ToString("MMM");
-            string file = Path.GetFullPath("../Logs/" + y + "/" + m + "/" + t + end);
-            if (!Directory.Exists(Path.GetDirectoryName(file)))
-                Directory.CreateDirectory(Path.GetDirectoryName(file));
-            Console.WriteLine("Dumping to " + file);
+            if (new DumpConfig().Dump) {
+                string t = DateTime.Now.ToString("dd-HH.mm");
+                string y = DateTime.Now.ToString("yyyy");
+                string m = DateTime.Now.ToString("MMM");
+                string file = Path.GetFullPath("../Logs/" + y + "/" + m + "/" + t + end);
+                if (!Directory.Exists(Path.GetDirectoryName(file)))
+                    Directory.CreateDirectory(Path.GetDirectoryName(file));
+                Console.WriteLine("Dumping to " + file);
 
-            if (new DumpConfig().Dump)
                 File.WriteAllText(file, dump);
+            }
         }
 
         private class DumpConfig : ConfigBase {
