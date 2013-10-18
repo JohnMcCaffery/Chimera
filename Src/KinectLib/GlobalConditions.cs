@@ -26,20 +26,7 @@ namespace Chimera.Kinect {
             get { return mInit; }
         }
 
-        
-        public static bool Init() {
-            if (mInit)
-                return true;
-            
-            Nui.DeviceConnected += () => {
-                Logger.Info("Kinect Connected.");
-                Nui.Init();
-            }; 
-            Nui.DeviceDisconnected += () => {
-                Logger.Info("Kinect Disconnected.");
-            };
-
-            int attempt = 1;
+        private static bool InitSensor() {            int attempt = 1;
             int wait = mConfig.InitialRetryWait;
             while (!Nui.Init()) {
                 if (attempt > mConfig.RetryAttempts)
@@ -53,6 +40,24 @@ namespace Chimera.Kinect {
                 float newWait = wait * mConfig.RetryWaitMultiplier;
                 wait = (int) newWait;
             }
+            Logger.Info("Kinect successfully initialised.");
+            return true;
+        }
+        
+        public static bool Init() {
+            if (mInit)
+                return true;
+            
+            Nui.DeviceConnected += () => {
+                Logger.Info("Kinect Connected.");
+                InitSensor();
+            }; 
+            Nui.DeviceDisconnected += () => {
+                Logger.Info("Kinect Disconnected.");
+            };
+
+            if (!InitSensor())
+                return false;
 
             Nui.SetAutoPoll(true);
             mInit = true;
