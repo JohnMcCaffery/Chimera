@@ -43,8 +43,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Lib\Nini.dll</HintPath>
     </Reference>
-    <Reference Include="NuiLib-DotNet_dv">
-      <HintPath>..\..\Lib\NuiLib-DotNet_dv.dll</HintPath>
+    <Reference Include="NuiLib-DotNet, Version=1.0.5039.33013, Culture=neutral, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Lib\NuiLib-DotNet.dll</HintPath>
     </Reference>
     <Reference Include="OpenMetaverse, Version=0.0.0.17443, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
