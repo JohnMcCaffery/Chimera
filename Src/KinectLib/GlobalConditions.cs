@@ -11,6 +11,7 @@ using System.Threading;
 
 namespace Chimera.Kinect {
     public static class GlobalConditions {
+        private static ILog Logger = LogManager.GetLogger("Kinect");
         private static bool mInit;
         private static Condition sActiveConditionR;
         private static Condition sActiveConditionL;
@@ -29,6 +30,14 @@ namespace Chimera.Kinect {
         public static bool Init() {
             if (mInit)
                 return true;
+            
+            Nui.DeviceConnected += () => {
+                Logger.Info("Kinect Connected.");
+                Nui.Init();
+            }; 
+            Nui.DeviceDisconnected += () => {
+                Logger.Info("Kinect Disconnected.");
+            };
 
             int attempt = 1;
             int wait = mConfig.InitialRetryWait;
@@ -36,7 +45,7 @@ namespace Chimera.Kinect {
                 if (attempt > mConfig.RetryAttempts)
                     return false;
 
-                LogManager.GetLogger("Kinect").Warn(String.Format("NuiLib unable to initialise Kinect after attempt {0}. Waiting {1}s and retrying.", attempt, (wait / 1000)));
+                Logger.Warn(String.Format("NuiLib unable to initialise Kinect after attempt {0} because {2}. Waiting {1}s and retrying.", attempt, (wait / 1000), Nui.State));
 
                 Thread.Sleep(wait);
 
