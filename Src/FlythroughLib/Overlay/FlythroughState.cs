@@ -208,6 +208,8 @@ namespace Chimera.Flythrough.Overlay {
         protected override void TransitionToFinish() {
             foreach (var step in mSteps.Values)
                 step.Prep();
+            mInput.Enabled = true;
+            mInput.Play();
         }
 
         protected override void TransitionFromStart() {

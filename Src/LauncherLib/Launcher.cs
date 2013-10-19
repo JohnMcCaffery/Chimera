@@ -86,8 +86,8 @@ namespace Chimera.Launcher {
             mConfig = new LauncherConfig(args);
 
             if (!GlobalConditions.Init()) {
-                Logger.Fatal("Unable to initialise Kinect. Exiting.");
-                return;
+                //Logger.Fatal("Unable to initialise Kinect. Exiting.");
+                //return;
             }
 
             var settings = new NinjectSettings { LoadExtensions = false };
