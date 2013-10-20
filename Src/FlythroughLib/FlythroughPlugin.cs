@@ -309,38 +309,40 @@ namespace Chimera.Flythrough {
             if (FlythroughLoading != null)
                 FlythroughLoading();
 
-            mEvents = new EventSequence<Camera>();
-            mEvents.LengthChange += new Action<EventSequence<Camera>, int>(mEvents_LengthChange);
+            lock (this) {
+                mEvents = new EventSequence<Camera>();
+                mEvents.LengthChange += new Action<EventSequence<Camera>, int>(mEvents_LengthChange);
 
-            XmlDocument doc = new XmlDocument();
-            doc.Load(file);
-            int start = 0;
-            XmlNode root = doc.GetElementsByTagName("Events")[0];
+                XmlDocument doc = new XmlDocument();
+                doc.Load(file);
+                int start = 0;
+                XmlNode root = doc.GetElementsByTagName("Events")[0];
 
-            XmlAttribute startPositionAttr = root.Attributes["StartPosition"];
-            XmlAttribute startPitchAttr = root.Attributes["StartPitch"];
-            XmlAttribute startYawAttr = root.Attributes["StartYaw"];
-            Vector3 startPos = mCore.Position;
-            double startPitch = mCore.Orientation.Pitch;
-            double startYaw = mCore.Orientation.Yaw;
-            if (startPositionAttr != null) Vector3.TryParse(startPositionAttr.Value, out startPos);
-            if (startPitchAttr != null) double.TryParse(startPitchAttr.Value, out startPitch);
-            if (startYawAttr != null) double.TryParse(startYawAttr.Value, out startYaw);
-            Start = new Camera(startPos, new Rotation(startPitch, startYaw));
+                XmlAttribute startPositionAttr = root.Attributes["StartPosition"];
+                XmlAttribute startPitchAttr = root.Attributes["StartPitch"];
+                XmlAttribute startYawAttr = root.Attributes["StartYaw"];
+                Vector3 startPos = mCore.Position;
+                double startPitch = mCore.Orientation.Pitch;
+                double startYaw = mCore.Orientation.Yaw;
+                if (startPositionAttr != null) Vector3.TryParse(startPositionAttr.Value, out startPos);
+                if (startPitchAttr != null) double.TryParse(startPitchAttr.Value, out startPitch);
+                if (startYawAttr != null) double.TryParse(startYawAttr.Value, out startYaw);
+                Start = new Camera(startPos, new Rotation(startPitch, startYaw));
 
-            foreach (XmlNode node in root.ChildNodes) {
-                if (node is XmlElement) {
-                    ComboEvent evt = new ComboEvent(this);
-                    evt.Load(node);
-                    mEvents.AddEvent(evt);
-                    start = evt.SequenceStartTime + evt.Length;
+                foreach (XmlNode node in root.ChildNodes) {
+                    if (node is XmlElement) {
+                        ComboEvent evt = new ComboEvent(this);
+                        evt.Load(node);
+                        mEvents.AddEvent(evt);
+                        start = evt.SequenceStartTime + evt.Length;
+                    }
                 }
+
+                mCore.Update(Start.Position, Vector3.Zero, Start.Orientation, Rotation.Zero);
+
+                if (FlythroughLoaded != null)
+                    FlythroughLoaded();
             }
-
-            mCore.Update(Start.Position, Vector3.Zero, Start.Orientation, Rotation.Zero);
-
-            if (FlythroughLoaded != null)
-                FlythroughLoaded();
         }
 
         /// <summary>
@@ -383,7 +385,8 @@ namespace Chimera.Flythrough {
             while (mPlaying && mEvents.Length > 0) {
                 IncrementTime();
                 mPrev = mCurrent;
-                mCurrent = mEvents.CurrentEvent.Value;
+                lock (this) 
+                    mCurrent = mEvents.CurrentEvent.Value;
 #if DEBUG
                 mStats.End();
 #endif
