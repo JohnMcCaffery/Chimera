@@ -29,7 +29,7 @@ using System.Drawing;
 using Chimera.Overlay.Triggers;
 
 namespace Chimera.Kinect.Overlay {
-    public class DeviceLostFactory : OverlayXmlLoader, ITriggerFactory {
+    public class DeviceInitialisedFactory : OverlayXmlLoader, ITriggerFactory {
         public SpecialTrigger Special {
             get { return SpecialTrigger.None; }
         }
@@ -39,18 +39,18 @@ namespace Chimera.Kinect.Overlay {
         }
 
         public override string Name {
-            get { return "DeviceLost"; }
+            get { return "DeviceInitialised"; }
         }
 
         public ITrigger Create(OverlayPlugin manager, XmlNode node) {
-            return new DeviceLostTrigger();
+            return new DeviceInitialisedTrigger();
         }
 
         public ITrigger Create(OverlayPlugin manager, XmlNode node, Rectangle clip) {
             return Create(manager, node);
         }
     }
-    public class DeviceLostTrigger : TriggerBase, ITrigger {
+    public class DeviceInitialisedTrigger : TriggerBase, ITrigger {
         private bool mActive;
 
         public override bool Active {
@@ -58,17 +58,17 @@ namespace Chimera.Kinect.Overlay {
             set {
                 if (mActive != value) {
                     mActive = value;
-                    if (value && !Nui.Initialised)
-                        Nui_DeviceLost();
+                    if (value && Nui.Initialised)
+                        Nui_DeviceInitialised();
                 }
             }
         }
 
-        public DeviceLostTrigger() {
-            Nui.DeviceDisconnected += new ChangeDelegate(Nui_DeviceLost);
+        public DeviceInitialisedTrigger() {
+            GlobalConditions.Initialised += new Action(Nui_DeviceInitialised);
         }
 
-        void Nui_DeviceLost() {
+        void Nui_DeviceInitialised() {
             Trigger();
         }
     }

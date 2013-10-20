@@ -127,6 +127,7 @@
       <DependentUpon>KinectCamera.cs</DependentUpon>
     </Compile>
     <Compile Include="Axes\LeanAxis.cs" />
+    <Compile Include="Overlay\DeviceInitialisedTrigger.cs" />
     <Compile Include="Overlay\DeviceFoundTrigger.cs" />
     <Compile Include="Overlay\DeviceLostTrigger.cs" />
     <Compile Include="Overlay\RaiseArmTrigger.cs" />

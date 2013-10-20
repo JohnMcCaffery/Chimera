@@ -18,11 +18,13 @@ namespace Chimera.Kinect {
 
         private static KinectAxisConfig mConfig = new KinectAxisConfig();
 
+        public static event Action Initialised;
+
         public static KinectAxisConfig Cfg {
             get { return mConfig; }
         }
 
-        public static bool Initialised {
+        public static bool IsInitialised {
             get { return mInit; }
         }
 
@@ -44,7 +46,9 @@ namespace Chimera.Kinect {
                 initialised = Nui.Init();
             }
             Logger.Info(initialised ? "Kinect successfully initialised." : "Unable to successfuly initialise NUI.");
-            initialised = Nui.Initialised;
+            if (initialised && Initialised != null)
+                Initialised();
+
             return true;
         }
         
