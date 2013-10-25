@@ -12,7 +12,8 @@ using System.Threading;
 namespace Chimera.Kinect {
     public static class GlobalConditions {
         private static ILog Logger = LogManager.GetLogger("Kinect");
-        private static bool mInit;
+        private static bool mVectorsInitialised;
+        private static bool mInitialising;
         private static Condition sActiveConditionR;
         private static Condition sActiveConditionL;
 
@@ -24,19 +25,20 @@ namespace Chimera.Kinect {
             get { return mConfig; }
         }
 
-        public static bool IsInitialised {
-            get { return mInit; }
+        public static bool VectorsInitialised {
+            get { return mVectorsInitialised; }
         }
 
         private static bool InitSensor() {
+            if (mInitialising || Nui.Initialised)
+                return Nui.Initialised;
+
+            mInitialising = true;
             int attempt = 1;
             int wait = mConfig.InitialRetryWait;
             bool initialised = Nui.Init();
-            while (!mInit && !initialised) {
-                if (attempt > mConfig.RetryAttempts)
-                    return false;
-
-                Logger.Warn(String.Format("NuiLib unable to initialise Kinect after attempt {0} because {2}. Waiting {1}s and retrying.", attempt, (wait / 1000), Nui.State));
+            while (!initialised && attempt <= mConfig.RetryAttempts) {
+                Logger.Warn(String.Format("NuiLib unable to initialise Kinect after attempt {0}. Reason: {2} Waiting {1}s and retrying.", attempt, (wait / 1000), Nui.State));
 
                 Thread.Sleep(wait);
 
@@ -45,15 +47,17 @@ namespace Chimera.Kinect {
                 wait = (int) newWait;
                 initialised = Nui.Init();
             }
-            Logger.Info(initialised ? "Kinect successfully initialised." : "Unable to successfuly initialise NUI.");
+
+            Logger.Info(initialised ? "Kinect successfully initialised." : "Unable to successfuly initialise NUI after " + (attempt - 1) + " attempts.");
             if (initialised && Initialised != null)
                 Initialised();
 
-            return true;
+            mInitialising = false;
+            return initialised;
         }
         
         public static bool Init() {
-            if (mInit)
+            if (mVectorsInitialised)
                 return true;
             
             Nui.DeviceConnected += () => {
@@ -69,7 +73,7 @@ namespace Chimera.Kinect {
             InitSensor();
 
             Nui.SetAutoPoll(true);
-            mInit = true;
+            mVectorsInitialised = true;
             Vector hipR = Nui.joint(Nui.Hip_Right);
             Vector handR = Nui.joint(Nui.Hand_Right);
             Vector handL = Nui.joint(Nui.Hand_Left);
@@ -92,14 +96,14 @@ namespace Chimera.Kinect {
 
         public static Condition ActiveR {
             get {
-                if (!mInit)
+                if (!mVectorsInitialised)
                     Init();
                 return sActiveConditionR;
             }
         }
         public static Condition ActiveL {
             get {
-                if (!mInit)
+                if (!mVectorsInitialised)
                     Init();
                 return sActiveConditionL;
             }
