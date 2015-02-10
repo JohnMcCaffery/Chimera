@@ -11,8 +11,10 @@ using System.Threading;
 using System.IO;
 using log4net;
 
-namespace Chimera.Plugins {
-    public class PanoramaPlugin : PluginBase<PanoramaPanel> {
+namespace Chimera.Plugins 
+{
+    public class PanoramaPlugin : PluginBase<PanoramaPanel> 
+    {
         private ILog Logger = LogManager.GetLogger("Panorama");
 
         private CoreConfig mConfig = new CoreConfig();
@@ -22,25 +24,32 @@ namespace Chimera.Plugins {
         private Queue<Bitmap> mScreenshots = new Queue<Bitmap>();
 
         public PanoramaPlugin()
-            : base("Panorama", plugin => new PanoramaPanel(plugin as PanoramaPlugin)) {
+            : base("Panorama", plugin => new PanoramaPanel(plugin as PanoramaPlugin)) 
+        {
         }
 
-        public override void Init(Core core) {
+        public override void Init(Core core) 
+        {
             base.Init(core);
             mFrame = mCore.Frames.First();
         }
 
-        public override Config.ConfigBase Config {
+        public override Config.ConfigBase Config 
+        {
             get { return mConfig; }
         }
 
-        public void TakePanorama() {
+        public void TakePanorama() 
+        {
             Rotation r = mCore.Orientation;
 
-            for (int i = 1; i < 7; i++) {
+            
+            for (int i = 1; i < 13; i++)
+            {
                 mCore.Update(mCore.Position, Vector3.Zero, GetRotation(i), Rotation.Zero);
                 Thread.Sleep(500);
             }
+            
 
             mRunning = true;
 
@@ -51,10 +60,78 @@ namespace Chimera.Plugins {
             t.Name = "Panorama Image Processor";
             t.Start();
 
-            for (int i = 1; i < 7; i++) {
-                mCore.Update(mCore.Position, Vector3.Zero, GetRotation(i), Rotation.Zero);
-                Thread.Sleep(mConfig.CaptureDelayMS);
-                TakeScreenshot();
+            float offset = 0.63f;
+
+            for (int i = 1; i < 13; i++)
+            {
+                if (i <= 6)
+                {
+                    mCore.Update(mCore.Position, Vector3.Zero, GetRotation(i), Rotation.Zero);
+                    Thread.Sleep(mConfig.CaptureDelayMS*2);
+                    TakeScreenshot();
+                }
+
+                else if (i == 7)
+                {
+                    //offset on z-plane
+                    Vector3 temp = mCore.Position;
+                    //mCore.Update(new Vector3(temp.X, temp.Y, temp.Z + offset), Vector3.Zero, GetRotation(i), Rotation.Zero);
+                    mCore.Update(new Vector3(temp.X, temp.Y, temp.Z), Vector3.Zero, GetRotation(i), Rotation.Zero);
+                    Thread.Sleep(mConfig.CaptureDelayMS * 2);
+                    TakeScreenshot();
+                    mCore.Update(temp, Vector3.Zero, GetRotation(i), Rotation.Zero);
+                }
+
+                else if (i == 8)
+                {
+                    //offset on x-plane
+                    Vector3 temp = mCore.Position;
+                    mCore.Update(new Vector3(temp.X + offset, temp.Y, temp.Z), Vector3.Zero, GetRotation(i), Rotation.Zero);
+                    Thread.Sleep(mConfig.CaptureDelayMS * 2);
+                    TakeScreenshot();
+                    mCore.Update(temp, Vector3.Zero, GetRotation(i), Rotation.Zero);
+                }
+
+                else if (i == 9)
+                {
+                    //offset on z-plane
+                    Vector3 temp = mCore.Position;
+                    //mCore.Update(new Vector3(temp.X, temp.Y, temp.Z + offset), Vector3.Zero, GetRotation(i), Rotation.Zero);
+                    mCore.Update(new Vector3(temp.X, temp.Y, temp.Z), Vector3.Zero, GetRotation(i), Rotation.Zero);
+                    Thread.Sleep(mConfig.CaptureDelayMS * 2);
+                    TakeScreenshot();
+                    mCore.Update(temp, Vector3.Zero, GetRotation(i), Rotation.Zero);
+                }
+
+                else if (i == 10)
+                {
+                    //offset on x-plane
+                    Vector3 temp = mCore.Position;
+                    mCore.Update(new Vector3(temp.X + offset, temp.Y, temp.Z), Vector3.Zero, GetRotation(i), Rotation.Zero);
+                    Thread.Sleep(mConfig.CaptureDelayMS * 2);
+                    TakeScreenshot();
+                    mCore.Update(temp, Vector3.Zero, GetRotation(i), Rotation.Zero);
+                }
+
+                else if (i == 11)
+                {
+                    //offset on y-plane
+                    Vector3 temp = mCore.Position;
+                    mCore.Update(new Vector3(temp.X, temp.Y + offset, temp.Z), Vector3.Zero, GetRotation(i), Rotation.Zero);
+                    Thread.Sleep(mConfig.CaptureDelayMS * 2);
+                    TakeScreenshot();
+                    mCore.Update(temp, Vector3.Zero, GetRotation(i), Rotation.Zero);
+                }
+
+                else if (i == 12)
+                {
+                    //offset on y-plane
+                    Vector3 temp = mCore.Position;
+                    mCore.Update(new Vector3(temp.X, temp.Y + offset, temp.Z), Vector3.Zero, GetRotation(i), Rotation.Zero);
+                    Thread.Sleep(mConfig.CaptureDelayMS * 2);
+                    TakeScreenshot();
+                    mCore.Update(temp, Vector3.Zero, GetRotation(i), Rotation.Zero);
+                }
             }
 
             mRunning = false;
@@ -62,20 +139,25 @@ namespace Chimera.Plugins {
             mCore.Update(mCore.Position, Vector3.Zero, r, Rotation.Zero);
         }
 
-        private void TakeScreenshot() {
+        private void TakeScreenshot() 
+        {
             Bitmap screenshot = new Bitmap(mFrame.Monitor.Bounds.Width, mFrame.Monitor.Bounds.Height);
-            using (Graphics g = Graphics.FromImage(screenshot)) {
+            using (Graphics g = Graphics.FromImage(screenshot)) 
+            {
                 g.CopyFromScreen(mFrame.Monitor.Bounds.Location, Point.Empty, mFrame.Monitor.Bounds.Size);
             }
             mScreenshots.Enqueue(screenshot);
         }
 
-        private void ScreenshotProcessor() {
+        private void ScreenshotProcessor() 
+        {
             int image = 1;
-            while (mRunning || mScreenshots.Count > 0) {
+            while (mRunning || mScreenshots.Count > 0) 
+            {
                 if (mScreenshots.Count > 0) {
                     Bitmap screenshot = mScreenshots.Dequeue();
-                    using (Bitmap resized = new Bitmap(screenshot, new Size(screenshot.Height, screenshot.Height))) {
+                    using (Bitmap resized = new Bitmap(screenshot, new Size(screenshot.Height, screenshot.Height))) 
+                    {
                         string file = Path.Combine(mConfig.ScreenshotFolder, GetImageName(image++) + ".png");
                         Logger.Info("Writing Panorama image to: " + file + ".");
                         resized.Save(file);
@@ -88,26 +170,42 @@ namespace Chimera.Plugins {
                 mForm.Close();
         }
 
-        private Rotation GetRotation(int image) {
-            switch (image) {
+        private Rotation GetRotation(int image) 
+        {
+            switch (image) 
+            {
                 case 1: return new Rotation(0.0, 0.0);
                 case 2: return new Rotation(0.0, 90);
                 case 3: return new Rotation(0.0, 180.0);
                 case 4: return new Rotation(0.0, -90);
                 case 5: return new Rotation(-90.0, 0.0);
                 case 6: return new Rotation(90.0, 0.0);
+                case 7: return new Rotation(0.0, 0.0);
+                case 8: return new Rotation(0.0, 90);
+                case 9: return new Rotation(0.0, 180.0);
+                case 10: return new Rotation(0.0, -90);
+                case 11: return new Rotation(-90.0, 0.0);
+                case 12: return new Rotation(90.0, 0.0);
                 default: return new Rotation(0.0, 0.0);
             }
         }
 
-        private string GetImageName(int image) {
-            switch (image) {
-                case 1: return "North";
-                case 2: return "West";
-                case 3: return "South";
-                case 4: return "East";
-                case 5: return "Up";
-                case 6: return "Down";
+        private string GetImageName(int image) 
+        {
+            switch (image) 
+            {
+                case 1: return "Front-L";
+                case 2: return "Right-L";
+                case 3: return "Back-L";
+                case 4: return "Left-L";
+                case 5: return "Up-L";
+                case 6: return "Down-L";
+                case 7: return "Front-R";
+                case 8: return "Right-R";
+                case 9: return "Back-R";
+                case 10: return "Left-R";
+                case 11: return "Up-R";
+                case 12: return "Down-R";
                 default: return "Unknown";
             }
         }
