@@ -29,11 +29,11 @@ using OpenMetaverse;
 using Chimera.Kinect;
 using Nini.Config;
 using System.Configuration;
-using GridProxy;
 using OpenMetaverse.Packets;
 using System.Threading;
-using Chimera.OpenSim;
 using System.IO;
+using UtilLib;
+using Chimera.OpenSim.Packets;
 
 namespace Test {
     public class Program {
@@ -50,6 +50,44 @@ namespace Test {
         static Scalar mY;
         private static Core mCoordinator;
         private static Vector3 sCentre = new Vector3(128f, 128f, 60f);
+
+
+
+        [STAThread]
+        public static void Main(string[] a) {
+            InterProxyServer server = new InterProxyServer(5000);
+            InterProxyClient client = new InterProxyClient("Client", 5000);
+
+            client.OnPacketReceived += new BackChannelPacketDelegate(client_OnPacketReceived);
+
+            SetCameraPacket p = new SetCameraPacket();
+            p.Camera.LookAt = new Vector3(1f, 2f, 3f);
+            p.Camera.LookAtDelta = new Vector3(0f, 0f, 0f);
+            p.Camera.Position = new Vector3(3f, 2f, 1f);
+            p.Camera.PositionDelta = new Vector3(0f, 0f, 0f);
+
+            Console.WriteLine("Sending packet");
+            server.BroadcastPacket(p);
+            Console.ReadLine();
+
+            Console.WriteLine("Sending packet");
+            server.BroadcastPacket(p);
+            Console.ReadLine();
+
+            Console.WriteLine("Sending packet");
+            server.BroadcastPacket(p);
+            Console.ReadLine();
+
+            Console.WriteLine("Exiting");
+
+	    client.Stop();
+            server.Stop();
+        }
+
+        static Packet client_OnPacketReceived(Packet packet, System.Net.IPEndPoint endPoint) {
+            Console.WriteLine("Received");
+            return packet;
+        }
 
         private static Rotation GetRot(Vector3 pos) {
             return new Rotation(sCentre - pos);
@@ -89,58 +127,6 @@ namespace Test {
                 return packet;
         }
 
-        [STAThread]
-        public static void Main(string[] a) {
-            /*
-            string localAddress = "127.0.0.1";
-            string portArg = "--proxy-login-port=8080";
-            string listenIPArg = "--proxy-proxyAddress-facing-address=" + localAddress;
-            string loginURIArg = "--proxy-remote-login-uri=http://localhost:9000";
-            string proxyCaps = "--proxy-caps=false";
-            string[] args = { portArg, listenIPArg, loginURIArg, proxyCaps };
-            ProxyConfig config = new ProxyConfig("Routing God", "jm726@st-andrews.ac.uk", args);
-            Proxy p = new Proxy(config);
-            bool send = false;
-            p.AddLoginResponseDelegate(response => {
-                new Thread(() => {
-                    Thread.Sleep(5000);
-                    send = true;
-                    Console.WriteLine("Starting to send packets.");
-                }).Start();
-            });
-            p.Start();
-            */
-
-            /*
-            mCoordinator = new Core(null);
-            Vector3 start = new Vector3(100f, 100f, 60f);
-            mCoordinator.Update(start, Vector3.Zero, GetRot(start), Rotation.Zero);
-            Frame f = new Frame("MainWindow");
-            mCoordinator.AddFrame(f);
-            FullController proxy = new FullController(f);
-            //BackwardCompatibleController proxy = new BackwardCompatibleController(w);
-            proxy.OnClientLoggedIn += (source, args) => new Thread(SendPackets).Start(proxy);
-            proxy.StartProxy(8080, "http://localhost:9000");
-            ViewerController viewer = new ViewerController("%^{F1}", "MainWindow");
-
-            string exe = Path.GetFullPath("../../Armadillo-Phoenix/Armadillo/Bin/firestorm-bin.exe");
-            //string exe = "C:\\Program Files (x86)\\Firestorm-Release\\Firestorm-Release.exe";
-
-            string viewerArgs = proxy.LoginURI;
-            viewerArgs += " --login Master Client clientPassword";
-            viewerArgs += " --channel \"Firestorm-Release\" --settings settings_firestorm_release_v4.xml --set InstallLanguage en";
-
-            viewer.Start(exe, Path.GetDirectoryName(exe), viewerArgs);
-            */
-
-            double firstDirect = CalcInterest(0, 300, .06);
-            double bos = CalcInterest(2000, 50, .0169);
-            Console.WriteLine("First Direct (300/m @ 6%) + Bank of Scotland (1.69%) = {0}", firstDirect + bos);
-            CalcInterest(2000, 350, .03);
-
-            Console.ReadLine();
-        }
-
         private static double CalcInterest(double start, double inc, double rate) {
             double total = start;
             double paid = 0;
@@ -156,6 +142,7 @@ namespace Test {
 
         }
 
+	/*
         private static void SendPackets(object param) {
             ProxyControllerBase controller = (ProxyControllerBase)param;
             SetFollowCamPropertiesPacket packet = MakePacket();
@@ -184,7 +171,7 @@ namespace Test {
                 }
             }
         }
-
+*/
 
 
             /*

@@ -208,6 +208,9 @@ namespace Chimera.OpenSim {
             get { return Frame.Core.ControlMode; }
         }
 
+        public OpenSimController() {
+        }
+
         public void Init(Frame frame) {
             mFrame = frame;
             mConfig = new ViewerConfig(frame.Name);

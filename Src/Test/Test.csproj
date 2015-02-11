@@ -57,6 +57,10 @@
       <Project>{58E39BFE-20D5-4C8D-BCFC-6B5E641C2DFF}</Project>
       <Name>ChimeraLib</Name>
     </ProjectReference>
+    <ProjectReference Include="..\DistributionLib\DistributionLib.csproj">
+      <Project>{318F9878-F3FB-40A5-922B-98AB88BCE395}</Project>
+      <Name>DistributionLib</Name>
+    </ProjectReference>
     <ProjectReference Include="..\LauncherLib\LauncherLib.csproj">
       <Project>{FE0EAF99-0485-4B17-BFCD-D5D9A2890DB3}</Project>
       <Name>LauncherLib</Name>
