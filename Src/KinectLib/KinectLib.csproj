@@ -74,10 +74,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Bin\NuiLib-DotNet.dll</HintPath>
     </Reference>
-    <Reference Include="OpenMetaverseTypes, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Lib\OpenMetaverseTypes.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
@@ -92,6 +88,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Axes\ArmYawAxis.cs" />
+    <Compile Include="Axes\ArmPitchAxis.cs" />
+    <Compile Include="Axes\StandAxis.cs" />
     <Compile Include="Axes\CrouchAxis.cs" />
     <Compile Include="Axes\DotAxis.cs" />
     <Compile Include="Axes\KinectAxis.cs" />
@@ -117,6 +115,12 @@
     </Compile>
     <Compile Include="Axes\KinectScaledAxis.cs" />
     <Compile Include="Axes\KinectAxisConfig.cs" />
+    <Compile Include="GUI\CrossArmsTriggerPanel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="GUI\CrossArmsTriggerPanel.Designer.cs">
+      <DependentUpon>CrossArmsTriggerPanel.cs</DependentUpon>
+    </Compile>
     <Compile Include="GUI\EyeTrackerPluginControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -130,6 +134,8 @@
       <DependentUpon>KinectCamera.cs</DependentUpon>
     </Compile>
     <Compile Include="Axes\LeanAxis.cs" />
+    <Compile Include="Overlay\CrossArmsLowTrigger.cs" />
+    <Compile Include="Overlay\CrossArmsTrigger.cs" />
     <Compile Include="Overlay\RaiseArmTrigger.cs" />
     <Compile Include="Overlay\SkeletonFoundTrigger.cs" />
     <Compile Include="Overlay\KinectControlState.cs" />
@@ -165,6 +171,10 @@
     <Compile Include="Axes\TwistAxis.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\libopenmetaverse\OpenMetaverseTypes\OpenMetaverseTypes.csproj">
+      <Project>{7EBA4367-FE5C-433B-B67D-B6A1BBD15B1D}</Project>
+      <Name>OpenMetaverseTypes</Name>
+    </ProjectReference>
     <ProjectReference Include="..\ChimeraLib\ChimeraLib.csproj">
       <Project>{58E39BFE-20D5-4C8D-BCFC-6B5E641C2DFF}</Project>
       <Name>ChimeraLib</Name>
@@ -191,6 +201,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="GUI\Axes\KinectScaledAxisPanel.resx">
       <DependentUpon>KinectScaledAxisPanel.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GUI\CrossArmsTriggerPanel.resx">
+      <DependentUpon>CrossArmsTriggerPanel.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="GUI\EyeTrackerPluginControl.resx">
       <DependentUpon>EyeTrackerPluginControl.cs</DependentUpon>

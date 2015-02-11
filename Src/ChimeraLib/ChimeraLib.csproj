@@ -33,7 +33,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
     <DebugSymbols>true</DebugSymbols>
-    <OutputPath>bin\x86\Debug\</OutputPath>
+    <OutputPath>..\..\Bin\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <DebugType>full</DebugType>
     <PlatformTarget>x86</PlatformTarget>
@@ -72,10 +72,6 @@
     <Reference Include="Nini">
       <HintPath>..\..\Lib\Nini.dll</HintPath>
     </Reference>
-    <Reference Include="OpenMetaverseTypes, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Lib\OpenMetaverseTypes.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
@@ -90,9 +86,23 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Config\AxisConfig.cs" />
     <Compile Include="Config\ConfigFolderBase.cs" />
+    <Compile Include="Config\ConfigParam.cs" />
     <Compile Include="Config\PluginConfig.cs" />
     <Compile Include="Config\ProjectorConfig.cs" />
+    <Compile Include="GUI\Controls\Plugins\PanoramaPanel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="GUI\Controls\Plugins\PanoramaPanel.Designer.cs">
+      <DependentUpon>PanoramaPanel.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GUI\Controls\Plugins\ScreenshotSequencePanel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="GUI\Controls\Plugins\ScreenshotSequencePanel.Designer.cs">
+      <DependentUpon>ScreenshotSequencePanel.cs</DependentUpon>
+    </Compile>
     <Compile Include="GUI\Controls\StatisticsPanel.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -119,6 +129,9 @@
     </Compile>
     <Compile Include="Interfaces\IDiagramDrawable.cs" />
     <Compile Include="Interfaces\IOutputFactory.cs" />
+    <Compile Include="Plugins\PanoramaPlugin.cs" />
+    <Compile Include="Plugins\PluginBase.cs" />
+    <Compile Include="Plugins\ScreenshotSequencePlugin.cs" />
     <Compile Include="Plugins\Projector.cs" />
     <Compile Include="GUI\Controls\Plugins\AxisBasedDeltaPanel.cs">
       <SubType>UserControl</SubType>
@@ -156,7 +169,6 @@
     <Compile Include="GUI\Controls\Plugins\SplitAxisPanel.Designer.cs">
       <DependentUpon>SplitAxisPanel.cs</DependentUpon>
     </Compile>
-    <Compile Include="Config\OverlayConfig.cs" />
     <Compile Include="GUI\Controls\Plugins\ProjectorPanel.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -170,7 +182,7 @@
     <Compile Include="Plugins\SplitAxis.cs" />
     <Compile Include="Interfaces\IAxis.cs" />
     <Compile Include="Interfaces\ITickListener.cs" />
-    <Compile Include="Config\CoordinatorConfig.cs" />
+    <Compile Include="Config\CoreConfig.cs" />
     <Compile Include="Config\FrameConfig.cs" />
     <Compile Include="GUI\Controls\ConditionalCheck.cs">
       <SubType>Component</SubType>
@@ -259,7 +271,6 @@
     <None Include="Overlay.cd" />
     <None Include="Core.cd" />
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
     <EmbeddedResource Include="GUI\Controls\Plugins\AxisBasedDeltaPanel.resx">
       <DependentUpon>AxisBasedDeltaPanel.cs</DependentUpon>
@@ -269,6 +280,12 @@
     </EmbeddedResource>
     <EmbeddedResource Include="GUI\Controls\Plugins\ConstrainedAxisPanel.resx">
       <DependentUpon>ConstrainedAxisPanel.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GUI\Controls\Plugins\PanoramaPanel.resx">
+      <DependentUpon>PanoramaPanel.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GUI\Controls\Plugins\ScreenshotSequencePanel.resx">
+      <DependentUpon>ScreenshotSequencePanel.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="GUI\Controls\Plugins\PluginSelectorPanel.resx">
       <DependentUpon>PluginSelectorPanel.cs</DependentUpon>
@@ -332,6 +349,12 @@
       <Isolated>False</Isolated>
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </COMReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\libopenmetaverse\OpenMetaverseTypes\OpenMetaverseTypes.csproj">
+      <Project>{7EBA4367-FE5C-433B-B67D-B6A1BBD15B1D}</Project>
+      <Name>OpenMetaverseTypes</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

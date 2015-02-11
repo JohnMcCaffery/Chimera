@@ -142,7 +142,7 @@ namespace Chimera {
         /// <summary>
         /// The object containing the configuration for the system.
         /// </summary>
-        private readonly CoordinatorConfig mConfig;
+        private readonly CoreConfig mConfig;
         /// <summary>
         /// Logger for recording details of how the core is operating.
         /// </summary>
@@ -215,6 +215,10 @@ namespace Chimera {
         /// When the view was last updated.
         /// </summary>
         private DateTime mLastUpdate;
+        /// <summary>
+        /// What exit code to exit with.
+        /// </summary>
+        private int mExitCode;
 
 
         /// <summary>
@@ -276,7 +280,7 @@ namespace Chimera {
         /// <param name="plugins">The plugins which control this coordinator.</param>
         public Core(IOutputFactory outputFactory, params ISystemPlugin[] plugins) {
             try {
-                mConfig = new CoordinatorConfig();
+                mConfig = new CoreConfig();
 
                 mPlugins = new List<ISystemPlugin>(plugins);
                 mOrientation = new Rotation(mRotationLock, mConfig.Pitch, mConfig.Yaw);
@@ -296,7 +300,7 @@ namespace Chimera {
 
                 foreach (string frame in mConfig.Frames)
                     if (outputFactory != null)
-                        AddFrame(new Frame(frame, outputFactory.Create()));
+                        AddFrame(new Frame(frame, outputFactory.Create(frame)));
                     else
                         AddFrame(new Frame(frame));
 
@@ -344,6 +348,14 @@ namespace Chimera {
 
         public bool Initialised {
             get { return mInitialised; }
+        }
+
+        /// <summary>
+        /// What exit code the application should exit with.
+        /// </summary>
+        public int ExitCode {
+            get { return mExitCode; }
+            set { mExitCode = value; }
         }
 
         /// <summary>

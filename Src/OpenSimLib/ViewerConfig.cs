@@ -25,9 +25,10 @@ using Chimera.Util;
 using System.IO;
 using Chimera.Config;
 using OpenMetaverse;
+using log4net;
 
 namespace Chimera.OpenSim {
-    internal class ViewerConfig : ConfigFolderBase {
+    public class ViewerConfig : ConfigFolderBase {
         public static readonly string DEFAULT_LOGINURI = "http://localhost:9000";
         public static readonly string DEFAULT_CLIENT_EXE = "C:\\Program Files (x86)\\Firestorm-Release\\Firestorm-Release.exe";
         public static readonly string DEFAULT_MASTER_ADDRESS = "127.0.0.1";
@@ -43,6 +44,13 @@ namespace Chimera.OpenSim {
         public string LoginGrid;
         public string ViewerWorkingDirectory;
         public string CrashLogFile;
+        /*
+        private ConfigParam mViewerArguments;
+        public string ViewerArguments {
+            get { return mViewerArguments.Value; }
+            set { mViewerArguments.Value = value; }
+        }
+        */
         public string ViewerArguments;
         public string ViewerToggleHUDKey;
         public bool UseGrid;
@@ -54,6 +62,8 @@ namespace Chimera.OpenSim {
         public Fill Fill = Fill.Windowed;
         public int ProxyPort;
 
+        public bool GetLocalID;
+
         public bool BackwardsCompatible;
         public string StartupKeyPresses;
         public float DeltaScale;
@@ -64,64 +74,97 @@ namespace Chimera.OpenSim {
         public bool ControlCameraPosition;
         public OpenMetaverse.Vector3 Offset;
         public int StartStagger;
+        public bool BlockOnViewerShutdown;
+        public string MasterFrame;
+
+	//Button Presser
+        public string Key;
+        public double IntervalMS;
+        public double StopM;
+        public bool AutoShutdown;
 
         public override string Group {
             get { return "SecondLifeViewer"; }
         }
 
         public ViewerConfig(params string[] args)
-            : base("OpenSim", args) {
+            : base("OpenSim", IGNORE_FRAME, args) {
         }
 
-        public ViewerConfig(string windowName, params string[] args)
-            : base(windowName, "OpenSim", args) {
+        public ViewerConfig(string frameName, params string[] args)
+            : base("OpenSim", frameName, args) {
         }
 
         protected override void InitConfig() {
-            ViewerExecutable = Path.GetFullPath(Get(true, "ViewerExe", DEFAULT_CLIENT_EXE, "The executable that runs the viewer."));
-            ViewerWorkingDirectory = Get(true, "WorkingDirectory", Path.GetDirectoryName(ViewerExecutable), "The workign directory for the viewer executable.");
-            ViewerArguments = Get(true, "ViewerArguments", "", "Any arguments to be passed to the viewer when it starts.");
-            ViewerToggleHUDKey= Get(true, "ViewerToggleHUDKey", "%^{F1}", "The key press that will toggle the HUD on and off in the viewer.");
-            ProxyLoginURI = Get(true, "LoginURI", DEFAULT_LOGINURI, "The URI of the server the proxy should proxy.");
-            UseGrid = Get(true, "UseGrid", false, "Whether to login using the --grid or --loginuri command line parameter to specify the login target.");
-            DeltaScale = Get(true, "DeltaScale", .25f, "How much to scale delta values by when using remote control.");
+            string folder = Environment.CurrentDirectory.Replace("\\Configs", "") + "\\";
+            string file = GetFile("ViewerExe", DEFAULT_CLIENT_EXE, "The executable that runs the viewer.",
+                "../../Armadillo-Phoenix/Bin/firestorm-bin.exe",
+                "../../Armadillo-Phoenix/Armadillo/Bin/firestorm-bin.exe",
+                "C:\\Program Files (x86)\\Firestorm-Release\\Firestorm-Release.exe",
+                "C:\\Program Files (x86)\\Firestorm-private-shutle01\\Firestorm-private-shutle01.exe");
 
-            ControlCameraPosition = Get(true, "ControlCameraOffset", false, "Whether to use SetFollowCamProperties packets to control the camera position.");
-            AllowFly = Get(true, "AllowFly", false, "Whether to allow the avatar to fly in delta mode.");
+            ViewerExecutable = Path.GetFullPath(Path.Combine(folder, file));
 
-            CheckForPause = Get(true, "CheckForPause", false, "Whether the proxy controller should check to see whether the updates have been received which correspond to the updates sent out.");
+            string defaultWD = new Uri(folder).MakeRelativeUri(new Uri(Path.GetDirectoryName(ViewerExecutable))).OriginalString;
+            ViewerWorkingDirectory = GetFolder("WorkingDirectory", defaultWD, "The workign directory for the viewer executable.");
 
-            UseThread = Get(true, "UseThread", false, "If true then each proxy will spawn a thread to deliver camera updates to the viewer at a constant rate. If false packets will be injected whenever CameraUpdate events are triggered.");
-            StartStagger = Get(true, "StartStagger", 60, "How many seconds to way between starting each viewer if multiple viewers are being launched.");
-            BackwardsCompatible = Get(true, "BackwardsCompatible", false, "If true, no unusual packets will be injected into the viewer. This will disable remote control and frustum control.");
+            //mViewerArguments = GetGeneralParam("ViewerArguments", "", "Any arguments to be passed to the viewer when it starts.");
+            ViewerArguments = GetStr("ViewerArguments", "", "Any arguments to be passed to the viewer when it starts.");
+            ViewerToggleHUDKey = GetStr("ViewerToggleHUDKey", "%^{F1}", "The key press that will toggle the HUD on and off in the viewer.");
+            UseGrid = Get("UseGrid", false, "Whether to login using the --grid or --loginuri command line parameter to specify the login target.");
+            DeltaScale = Get("DeltaScale", .25f, "How much to scale delta values by when using remote control.");
+            MasterFrame = GetStr("MasterFrame", "MainWindow", "The name of the frame which is to be the master controller.");
 
-            CrashLogFile = Get(true, "CrashLogFile", "CrashLog.log", "The log file to record crashes to.");
+            GetLocalID = Get("GetLocalID", false, "Whether to check all ObjectUpdate packets until the local ID for the logged in agent is parsed. Required for requesting AvatarPosition and AvatarOrientation.");
 
-            LoginFirstName = Get(false, "FirstName", null, "The first name to log the viewer in with.");
-            LoginLastName = Get(false, "LastName", null, "The last name to log the viewer in with.");
-            LoginPassword = Get(false, "Password", null, "The password to log the viewer in with.");
-            ProxyPort = Get(false, "ProxyPort", CURRENT_PORT++, "The port to run the proxy on.");
-            LoginGrid = Get(false, "ProxyGrid", ProxyPort.ToString(), "The name of the grid the proxy will appear as.");
+            ProxyLoginURI = GetStr("LoginURI", DEFAULT_LOGINURI, "The URI of the server the proxy should proxy.", 
+                "http://192.168.1.181:9000", 
+                "http://169.254.189.108:9000", 
+                "http://138.251.194.191:9000", 
+                "http://apollo.cs.st-andrews.ac.uk:8002", 
+                "http://mimuve.cs.st-andrews.ac.uk:8002", 
+                "http://192.168.1.101:9000", 
+                "http://localhost:9000 ");
+
+            BlockOnViewerShutdown = Get("BlockOnViewerShutdown", false, "Whether to block while the viewer is being shutdown as the system is shut down. If true the GUI might become unresponsive during shutdown but viewer is more likely to exit correctly."); 
+
+            ControlCameraPosition = Get("ControlCameraOffset", false, "Whether to use SetFollowCamProperties packets to control the camera position.");
+            AllowFly = Get("AllowFly", false, "Whether to allow the avatar to fly in delta mode.");
+
+            CheckForPause = Get("CheckForPause", false, "Whether the proxy controller should check to see whether the updates have been received which correspond to the updates sent out.");
+
+            UseThread = Get("UseThread", false, "If true then each proxy will spawn a thread to deliver camera updates to the viewer at a constant rate. If false packets will be injected whenever CameraUpdate events are triggered.");
+            StartStagger = Get("StartStagger", 60, "How many seconds to way between starting each viewer if multiple viewers are being launched.");
+            BackwardsCompatible = Get("BackwardsCompatible", false, "If true, no unusual packets will be injected into the viewer. This will disable remote control and frustum control.");
+
+            CrashLogFile = GetFile("CrashLogFile", "CrashLog.log", "The log file to record crashes to.");
+            AutoRestartViewer = Get("AutoRestart", false, "Whether to automatically restart the viewer if the process exits.");
+            StartupKeyPresses = GetStr("StartupKeyPresses", "", "A series of key presses, using SendKeys syntax, which will be pressed when the viewer logs in. Separate sequences with commas.");
+
+            LoginFirstName = GetFrame("FirstName", null, "The first name to log the viewer in with.");
+            LoginLastName = GetFrame("LastName", null, "The last name to log the viewer in with.");
+            LoginPassword = GetFrame("Password", null, "The password to log the viewer in with.");
+            ProxyPort = GetFrame("ProxyPort", CURRENT_PORT++, "The port to run the proxy on.");
+            LoginGrid = GetFrame("ProxyGrid", "Proxy:" + ProxyPort.ToString(), "The name of the grid the proxy will appear as.");
             AutoLoginClient = LoginFirstName != null && LoginLastName != null && LoginPassword != null;
 
-            AutoStartProxy = Get(false, "AutoStartProxy", false, "Whether to automatically start the proxy when the system start.");
-            AutoStartViewer = Get(false, "AutoStartViewer", false, "Whether to automatically start the viewer when the system starts.");
-            AutoRestartViewer = Get(true, "AutoRestart", false, "Whether to automatically restart the viewer if the process exits.");
-            ControlCamera = Get(false, "ControlCamera", true, "Whether to control the position of the camera on the viewer.");
-            ControlFrustum = Get(false, "ControlFrustum", true, "Whether to control the viewing frustum on the viewer.");
+            AutoStartProxy = GetFrame("AutoStartProxy", false, "Whether to automatically start the proxy when the system start.");
+            AutoStartViewer = GetFrame("AutoStartViewer", false, "Whether to automatically start the viewer when the system starts.");
+            ControlCamera = GetFrame("ControlCamera", true, "Whether to control the position of the camera on the viewer.");
+            ControlFrustum = GetFrame("ControlFrustum", true, "Whether to control the viewing frustum on the viewer.");
 
-            Fill fill;
-            string fillStr = Get(false, "Fill", "Windowed", "What mode to set the window to, 'Full', 'Windowed', 'Left', 'Right'.");
-            if (fillStr != null && fillStr.ToUpper() != "NONE" && Enum.TryParse(fillStr, out fill))
-                Fill = fill;
-
-            Offset = GetV(false, "Offset", Vector3.Zero, "Offset from the raw camera position to apply.");
-
-            StartupKeyPresses = Get(true, "StartupKeyPresses", "", "A series of key presses, using SendKeys syntax, which will be pressed when the viewer logs in. Separate sequences with commas.");
+            Fill = GetFrameEnum<Fill>("Fill", Fill.Windowed, "What mode to set the window to.", LogManager.GetLogger(Frame + "Viewer"));
+            Offset = GetVFrame("Offset", Vector3.Zero, "Offset from the raw camera position to apply."); 
 
             //EnableWindowPackets = Init.Get(generalConfig, "EnableWindowPackets", true);
             //UseSetFollowCamPackets = !enableWindowPackets || Get(generalConfig, "UseSetFollowCamPackets", false);
             //ControlCamera = Init.Get(sectionConfig, "ControlCamera", true);
+
+            //Button Presser
+            Key = GetSection("KeyPresser", "Key", "^'", "The button to press ever <IntervalS> seconds.");
+            IntervalMS = Get("KeyPresser", "IntervalS", .5, "How long (in seconds) between each Button press.") * 1000.0;
+            StopM = Get("KeyPresser", "ShutdownM", 1, "How many minutes the key presser should run before stopping.");
+            AutoShutdown = Get("KeyPresser", "AutoShutdown", false, "Whether to shut down the viewer when key presses have stopped.");
         }
     }
 }

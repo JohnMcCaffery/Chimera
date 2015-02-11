@@ -70,13 +70,9 @@
     <Reference Include="log4net">
       <HintPath>..\..\Lib\log4net.dll</HintPath>
     </Reference>
-    <Reference Include="OpenMetaverse, Version=0.0.0.33123, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="OpenMetaverse, Version=0.0.0.27030, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Lib\OpenMetaverse.dll</HintPath>
-    </Reference>
-    <Reference Include="OpenMetaverseTypes, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Lib\OpenMetaverseTypes.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -93,6 +89,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BackwardCompatibleController.cs" />
+    <Compile Include="Interfaces\IOpensimBotConfig.cs" />
+    <Compile Include="OpensimBotPlugin.cs" />
     <Compile Include="FullController.cs" />
     <Compile Include="GUI\InputPanel.cs">
       <SubType>UserControl</SubType>
@@ -106,11 +104,11 @@
     <Compile Include="GUI\OutputPanel.designer.cs">
       <DependentUpon>OutputPanel.cs</DependentUpon>
     </Compile>
-    <Compile Include="GUI\HeightmapInputPanel.cs">
+    <Compile Include="GUI\OpensimBotPanel.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="GUI\HeightmapInputPanel.designer.cs">
-      <DependentUpon>HeightmapInputPanel.cs</DependentUpon>
+    <Compile Include="GUI\OpensimBotPanel.designer.cs">
+      <DependentUpon>OpensimBotPanel.cs</DependentUpon>
     </Compile>
     <Compile Include="HeightmapConfig.cs" />
     <Compile Include="HeightmapPlugin.cs" />
@@ -118,6 +116,8 @@
     <Compile Include="OpenSimController.cs" />
     <Compile Include="OpenSimViewerFactory.cs" />
     <Compile Include="Overlay\InfoState.cs" />
+    <Compile Include="Overlay\KeyClickFeature.cs" />
+    <Compile Include="Overlay\KeyPressFeature.cs" />
     <Compile Include="Packets\ClearRemoteControlPacket.cs" />
     <Compile Include="Packets\ClearFrustumPacket.cs" />
     <Compile Include="Packets\ClearCameraPacket.cs" />
@@ -125,6 +125,13 @@
     <Compile Include="Packets\SetWindowPacket.cs" />
     <Compile Include="Packets\SetFrustumPacket.cs" />
     <Compile Include="Packets\SetCameraPacket.cs" />
+    <Compile Include="GUI\KeyPresserPanel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="GUI\KeyPresserPanel.Designer.cs">
+      <DependentUpon>KeyPresserPanel.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Plugins\KeyPresser.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ProxyControllerPacketThread.cs" />
     <Compile Include="ViewerConfig.cs" />
@@ -133,6 +140,10 @@
     <Compile Include="ViewerController.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\libopenmetaverse\OpenMetaverseTypes\OpenMetaverseTypes.csproj">
+      <Project>{7EBA4367-FE5C-433B-B67D-B6A1BBD15B1D}</Project>
+      <Name>OpenMetaverseTypes</Name>
+    </ProjectReference>
     <ProjectReference Include="..\ChimeraLib\ChimeraLib.csproj">
       <Project>{58E39BFE-20D5-4C8D-BCFC-6B5E641C2DFF}</Project>
       <Name>ChimeraLib</Name>
@@ -149,9 +160,8 @@
     <EmbeddedResource Include="GUI\OutputPanel.resx">
       <DependentUpon>OutputPanel.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="GUI\HeightmapInputPanel.resx">
-      <DependentUpon>HeightmapInputPanel.cs</DependentUpon>
-      <SubType>Designer</SubType>
+    <EmbeddedResource Include="GUI\KeyPresserPanel.resx">
+      <DependentUpon>KeyPresserPanel.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup />

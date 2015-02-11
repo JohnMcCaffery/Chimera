@@ -127,6 +127,10 @@ namespace Chimera {
         /// Redraw functions to force the GUI to re-draw;
         /// </summary>
         private HashSet<Action> mRedraws = new HashSet<Action>();
+        /// <summary>
+        /// The configuration object used to load start values in for this frame.
+        /// </summary>
+        private FrameConfig mConfig;
 
         /// <summary>
         /// Triggered whenever the position of this input changes.
@@ -146,15 +150,15 @@ namespace Chimera {
         public Frame(string frameName) {
             mName = frameName;
 
-            FrameConfig cfg = new FrameConfig(frameName);
-            mMonitor = Screen.AllScreens.FirstOrDefault(s => s.DeviceName.Equals(cfg.Monitor));
-            mWidth = cfg.Width;
-            mHeight = cfg.Height;
-            mTopLeft = cfg.TopLeft;
-            mOrientation = new Rotation(cfg.Pitch, cfg.Yaw);
+            mConfig = new FrameConfig(frameName);
+            mMonitor = Screen.AllScreens.FirstOrDefault(s => s.DeviceName.Equals(mConfig.Monitor));
+            mWidth = mConfig.Width;
+            mHeight = mConfig.Height;
+            mTopLeft = mConfig.TopLeft;
+            mOrientation = new Rotation(mConfig.Pitch, mConfig.Yaw);
             mCentre = Centre;
-            mDraw = cfg.Draw;
-            mDrawEye = cfg.DrawEye;
+            mDraw = mConfig.Draw;
+            mDrawEye = mConfig.DrawEye;
 
             mOrientation.Changed += mOrientation_Changed;
 
@@ -178,6 +182,13 @@ namespace Chimera {
         public Core Core {
             get { return mCoordinator ; }
             set { mCoordinator  = value; }
+        }
+
+        /// <summary>
+        /// The configuration object where all the values are stored.
+        /// </summary>
+        public FrameConfig Config {
+            get { return mConfig; }
         }
 
         /// <summary>
@@ -598,7 +609,7 @@ namespace Chimera {
             float fH = (float) (1.0 /  Math.Tan(HFieldOfView / 2.0));
             float fV = (float) (1.0 /  Math.Tan(VFieldOfView / 2.0));
             float zNear = .1f;
-            float zFar = 1024f;
+            float zFar = mConfig.FarClip;
             return new Matrix4(
                 fH, 0,      0,                                  0,
                 0,  fV,     0,                                  0,
@@ -608,7 +619,7 @@ namespace Chimera {
 
         private Matrix4 CalculatedProjection() {
             float dn = .1f;
-            float df = 1024f;
+            float df = mConfig.FarClip;
             double scale = 1f / ScreenDistance;
 
             float hFoV = (float)(2.0 / (mWidth * scale));
@@ -627,7 +638,7 @@ namespace Chimera {
 
         private Matrix4 CalculateOrthogonalMatrix() {
             float dn = .1f;
-            float df = 1024f;
+            float df = mConfig.FarClip;
             double scale = 1f / ScreenDistance;
             float r = (float) ((mWidth * scale) / 2.0);
             float t = (float) ((mHeight * scale) / 2.0);
@@ -649,6 +660,10 @@ namespace Chimera {
                 Restarted();
             if (mOutput != null)
                 mOutput.Restart("User");
+        }
+
+        internal void UpdateFrustum() {
+            TriggerChanged();
         }
     }
 }

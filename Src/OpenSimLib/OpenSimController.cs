@@ -37,7 +37,7 @@ namespace Chimera.OpenSim {
         private static Form sForm = null;
 
         private readonly ILog ThisLogger = LogManager.GetLogger("OpenSim");
-        private bool mEnabled;
+        private bool mEnabled = true;
         private bool mClosingViewer;
         private bool mShuttingDown;
         private ViewerConfig mConfig;
@@ -54,11 +54,25 @@ namespace Chimera.OpenSim {
         private ProxyControllerBase mProxyController;
         private ViewerController mViewerController;
 
-        internal ProxyControllerBase ProxyController {
+        public event EventHandler ClientLoginComplete;
+
+        public Vector3 PositionOffset {
+            get { return mProxyController.PositionOffset; }
+        }
+
+        public Vector3 AvatarPosition {
+            get { return mProxyController.AvatarPosition; }
+        }
+
+        public Rotation AvatarOrientation {
+            get { return mProxyController.AvatarOrientation; }
+        }
+
+        public ProxyControllerBase ProxyController {
             get { return mProxyController; }
         }
 
-        internal ViewerController ViewerController {
+        public ViewerController ViewerController {
             get { return mViewerController; }
         }
 
@@ -212,6 +226,7 @@ namespace Chimera.OpenSim {
             mFrame.Core.ControlModeChanged += new Action<Core, ControlMode>(Coordinator_CameraModeChanged);
             mFrame.Core.EyeUpdated += new Action<Core, EventArgs>(Coordinator_EyeUpdated);
             mFrame.Core.InitialisationComplete += new Action(Core_InitialisationComplete);
+            mFrame.Core.Tick += new Action(CheckTimeoutThread);
             mFrame.Changed += new Action<Chimera.Frame, EventArgs>(mFrame_Changed);
             mFrame.MonitorChanged += new Action<Chimera.Frame, Screen>(mFrame_MonitorChanged);
             mProxyController.OnClientLoggedIn += new EventHandler(mProxyController_OnClientLoggedIn);
@@ -281,7 +296,7 @@ namespace Chimera.OpenSim {
         private string mArgs;
 
         public bool StartViewer() {
-            mArgs = mProxyController.LoginURI;
+            mArgs = mConfig.UseGrid ? "--grid " + mConfig.LoginGrid : mProxyController.LoginURI;
             if (mConfig.LoginFirstName != null && mConfig.LoginLastName != null && mConfig.LoginPassword != null)
                 mArgs += " --login " + mConfig.LoginFirstName + " " + mConfig.LoginLastName + " " + mConfig.LoginPassword;
             mArgs += " " + mConfig.ViewerArguments.Trim();
@@ -379,6 +394,9 @@ namespace Chimera.OpenSim {
 
                 if (mManager != null)
                     mManager.BringToFront();
+
+                if (ClientLoginComplete != null)
+                    ClientLoginComplete(sender, null);
             }).Start();
 
 
@@ -398,6 +416,9 @@ namespace Chimera.OpenSim {
         }
 
         void mViewerController_Exited() {
+            if (sViewerStartDelay > 0)
+                sViewerStartDelay -= mConfig.StartStagger;
+
             if (mConfig.AutoRestartViewer && !mClosingViewer)
                 Restart("UnexpectedViewerClose");
             mClosingViewer = false;
@@ -408,6 +429,15 @@ namespace Chimera.OpenSim {
         }
 
         #endregion
+
+        void CheckTimeoutThread() {
+            if (mViewerController.Started && DateTime.Now.Subtract(mProxyController.LastUpdatePacket).TotalMinutes > 1.0) {
+                mProxyController.LastUpdatePacket = DateTime.Now;
+                new Thread(() => {
+                Restart("ViewerStoppedResponding");
+                }).Start();
+            }
+        }
 
         private void CheckTimeout() {
             //if (mViewerController.Started && mProxyController.LoggedIn && DateTime.Now.Subtract(mProxyController.LastUpdatePacket).TotalMinutes > 1.0) {
@@ -426,7 +456,7 @@ namespace Chimera.OpenSim {
 
         public void Stop() {
             mClosingViewer = true;
-            mViewerController.Close(false);
+            mViewerController.Close(mConfig.BlockOnViewerShutdown);
             StopProxy();
             lock (mStartLock)
                 Monitor.PulseAll(mStartLock);

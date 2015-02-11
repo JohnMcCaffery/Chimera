@@ -26,6 +26,7 @@ using System.Windows.Forms;
 using OpenMetaverse;
 using System.Drawing;
 using Chimera.Config;
+using log4net;
 
 namespace Chimera.Plugins {
     public abstract class DeltaBasedPlugin : ISystemPlugin {
@@ -37,7 +38,7 @@ namespace Chimera.Plugins {
         private bool mEnableZ = true;
         private bool mEnablePitch = true;
         private bool mEnableYaw = true;
-        private bool mEnabled;
+        private bool mEnabled = true;
 
         public Action<DeltaBasedPlugin> Change;
 
@@ -96,6 +97,8 @@ namespace Chimera.Plugins {
                 }
             }
         }
+
+        private readonly ILog Logger = LogManager.GetLogger("DeltaBasedPlugin");
 
         protected void TriggerChange(DeltaBasedPlugin input) {
             Vector3 moveDelta = PositionDelta;
@@ -191,7 +194,8 @@ namespace Chimera.Plugins {
         /// <param name="input">The source of tick and keyboard events.</param>
         public virtual void Init(Core input) {
             mCoordinator = input;
-        }
+        }
+
         public virtual void SetForm(Form form) { }
     }
 }

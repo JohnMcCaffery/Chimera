@@ -6,9 +6,10 @@ using Chimera.Util;
 using Chimera.Interfaces;
 using System.IO;
 using Chimera.Plugins;
+using Chimera.Config;
 
 namespace Chimera.Kinect.Axes {
-    public class KinectAxisConfig : AxisBasedDelta.AxisConfig {
+    public class KinectAxisConfig : AxisConfig {
         public int RetryAttempts;
         public int InitialRetryWait;
         public float RetryWaitMultiplier;
