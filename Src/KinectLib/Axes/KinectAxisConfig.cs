@@ -22,9 +22,9 @@ namespace Chimera.Kinect.Axes {
         protected override void InitConfig() {
             base.InitConfig();
 
-            RetryAttempts = Get(true, "RetryAttempts", 10, "How many times to retry to get a connection to the Kinect.");
-            RetryWaitMultiplier = Get(true, "RetryWaitMultiplier", 1.5f, "How long to extend the wait by each retry attempt.");
-            InitialRetryWait = Get(true, "InitialRetryWaitMS", 2000, "How long to wait before retrying to connect to the Kinect on the first attempt.");
+            RetryAttempts = Get("RetryAttempts", 10, "How many times to retry to get a connection to the Kinect.");
+            RetryWaitMultiplier = Get("RetryWaitMultiplier", 1.5f, "How long to extend the wait by each retry attempt.");
+            InitialRetryWait = Get("InitialRetryWaitMS", 2000, "How long to wait before retrying to connect to the Kinect on the first attempt.");
         }
     }
 }
