@@ -44,7 +44,7 @@ namespace Chimera.Plugins
             Rotation r = mCore.Orientation;
 
             
-            for (int i = 1; i < 13; i++)
+            for (int i = 1; i < 7; i++)
             {
                 mCore.Update(mCore.Position, Vector3.Zero, GetRotation(i), Rotation.Zero);
                 Thread.Sleep(500);
@@ -60,80 +60,18 @@ namespace Chimera.Plugins
             t.Name = "Panorama Image Processor";
             t.Start();
 
-            float offset = 0.63f;
-
-            for (int i = 1; i < 13; i++)
+            for (int i = 1; i < 7; i++)
             {
                 if (i <= 6)
                 {
                     mCore.Update(mCore.Position, Vector3.Zero, GetRotation(i), Rotation.Zero);
-                    Thread.Sleep(mConfig.CaptureDelayMS*2);
+                    Thread.Sleep(mConfig.CaptureDelayMS * 6);
                     TakeScreenshot();
-                }
-
-                else if (i == 7)
-                {
-                    //offset on z-plane
-                    Vector3 temp = mCore.Position;
-                    //mCore.Update(new Vector3(temp.X, temp.Y, temp.Z + offset), Vector3.Zero, GetRotation(i), Rotation.Zero);
-                    mCore.Update(new Vector3(temp.X, temp.Y, temp.Z), Vector3.Zero, GetRotation(i), Rotation.Zero);
-                    Thread.Sleep(mConfig.CaptureDelayMS * 2);
-                    TakeScreenshot();
-                    mCore.Update(temp, Vector3.Zero, GetRotation(i), Rotation.Zero);
-                }
-
-                else if (i == 8)
-                {
-                    //offset on x-plane
-                    Vector3 temp = mCore.Position;
-                    mCore.Update(new Vector3(temp.X + offset, temp.Y, temp.Z), Vector3.Zero, GetRotation(i), Rotation.Zero);
-                    Thread.Sleep(mConfig.CaptureDelayMS * 2);
-                    TakeScreenshot();
-                    mCore.Update(temp, Vector3.Zero, GetRotation(i), Rotation.Zero);
-                }
-
-                else if (i == 9)
-                {
-                    //offset on z-plane
-                    Vector3 temp = mCore.Position;
-                    //mCore.Update(new Vector3(temp.X, temp.Y, temp.Z + offset), Vector3.Zero, GetRotation(i), Rotation.Zero);
-                    mCore.Update(new Vector3(temp.X, temp.Y, temp.Z), Vector3.Zero, GetRotation(i), Rotation.Zero);
-                    Thread.Sleep(mConfig.CaptureDelayMS * 2);
-                    TakeScreenshot();
-                    mCore.Update(temp, Vector3.Zero, GetRotation(i), Rotation.Zero);
-                }
-
-                else if (i == 10)
-                {
-                    //offset on x-plane
-                    Vector3 temp = mCore.Position;
-                    mCore.Update(new Vector3(temp.X + offset, temp.Y, temp.Z), Vector3.Zero, GetRotation(i), Rotation.Zero);
-                    Thread.Sleep(mConfig.CaptureDelayMS * 2);
-                    TakeScreenshot();
-                    mCore.Update(temp, Vector3.Zero, GetRotation(i), Rotation.Zero);
-                }
-
-                else if (i == 11)
-                {
-                    //offset on y-plane
-                    Vector3 temp = mCore.Position;
-                    mCore.Update(new Vector3(temp.X, temp.Y + offset, temp.Z), Vector3.Zero, GetRotation(i), Rotation.Zero);
-                    Thread.Sleep(mConfig.CaptureDelayMS * 2);
-                    TakeScreenshot();
-                    mCore.Update(temp, Vector3.Zero, GetRotation(i), Rotation.Zero);
-                }
-
-                else if (i == 12)
-                {
-                    //offset on y-plane
-                    Vector3 temp = mCore.Position;
-                    mCore.Update(new Vector3(temp.X, temp.Y + offset, temp.Z), Vector3.Zero, GetRotation(i), Rotation.Zero);
-                    Thread.Sleep(mConfig.CaptureDelayMS * 2);
-                    TakeScreenshot();
-                    mCore.Update(temp, Vector3.Zero, GetRotation(i), Rotation.Zero);
                 }
             }
+            
 
+            
             mRunning = false;
 
             mCore.Update(mCore.Position, Vector3.Zero, r, Rotation.Zero);
@@ -180,18 +118,12 @@ namespace Chimera.Plugins
                 case 4: return new Rotation(0.0, -90);
                 case 5: return new Rotation(-90.0, 0.0);
                 case 6: return new Rotation(90.0, 0.0);
-                case 7: return new Rotation(0.0, 0.0);
-                case 8: return new Rotation(0.0, 90);
-                case 9: return new Rotation(0.0, 180.0);
-                case 10: return new Rotation(0.0, -90);
-                case 11: return new Rotation(-90.0, 0.0);
-                case 12: return new Rotation(90.0, 0.0);
                 default: return new Rotation(0.0, 0.0);
             }
         }
 
         private string GetImageName(int image) 
-        {
+         {
             switch (image) 
             {
                 case 1: return "Front-L";
@@ -200,12 +132,6 @@ namespace Chimera.Plugins
                 case 4: return "Left-L";
                 case 5: return "Up-L";
                 case 6: return "Down-L";
-                case 7: return "Front-R";
-                case 8: return "Right-R";
-                case 9: return "Back-R";
-                case 10: return "Left-R";
-                case 11: return "Up-R";
-                case 12: return "Down-R";
                 default: return "Unknown";
             }
         }

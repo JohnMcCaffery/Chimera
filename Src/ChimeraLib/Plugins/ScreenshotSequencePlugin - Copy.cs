@@ -9,10 +9,8 @@ using System.Drawing;
 using System.IO;
 using System.Threading;
 
-namespace Chimera.Plugins
-{
-    public class ScreenshotSequencePlugin : ISystemPlugin
-    {
+namespace Chimera.Plugins {
+    public class ScreenshotSequencePlugin : ISystemPlugin {
         private CoreConfig mConfig = new CoreConfig();
         private Core mCore;
         private ScreenshotSequencePanel mPanel;
@@ -22,23 +20,19 @@ namespace Chimera.Plugins
         private DateTime mStarted;
         private DateTime mLastPress;
         private Action mTickListener;
-        private Frame mFrame;
+		private Frame mFrame;
 
         private Queue<Bitmap> mScreenshots = new Queue<Bitmap>();
 
         public event Action Started;
         public event Action Stopped;
 
-        public bool Running
-        {
+        public bool Running {
             get { return mRunning; }
-            set
-            {
-                if (mRunning != value)
-                {
+            set {
+                if (mRunning != value) {
                     mRunning = value;
-                    if (value)
-                    {
+                    if (value) {
                         mStarted = DateTime.Now;
                         mCore.Tick += mTickListener;
                         Thread t = new Thread(ScreenshotProcessor);
@@ -46,9 +40,7 @@ namespace Chimera.Plugins
                         t.Start();
                         if (Started != null)
                             Started();
-                    }
-                    else
-                    {
+                    } else {
                         mCore.Tick -= mTickListener;
                         if (Started != null)
                             Stopped();
@@ -57,37 +49,30 @@ namespace Chimera.Plugins
             }
         }
 
-        public void Init(Core core)
-        {
+        public void Init(Core core) {
             mCore = core;
-            mFrame = mCore.Frames[0];
+	    mFrame = mCore.Frames[0];
             mTickListener = new Action(TickListener);
         }
 
-        public void SetForm(Form form)
-        {
+        public void SetForm(Form form) {
             mForm = form;
         }
 
         public event Action<IPlugin, bool> EnabledChanged;
 
-        public Control ControlPanel
-        {
-            get
-            {
+        public Control ControlPanel {
+            get {
                 if (mPanel == null)
                     mPanel = new ScreenshotSequencePanel(this);
                 return mPanel;
             }
         }
 
-        public bool Enabled
-        {
+        public bool Enabled {
             get { return mEnabled; }
-            set
-            {
-                if (mEnabled != value)
-                {
+            set {
+                if (mEnabled != value) {
                     mEnabled = value;
                     if (EnabledChanged != null)
                         EnabledChanged(this, value);
@@ -95,47 +80,36 @@ namespace Chimera.Plugins
             }
         }
 
-        public string Name
-        {
+        public string Name {
             get { return "ScreenshotSequence"; }
         }
 
-        public string State
-        {
+        public string State {
             get { throw new NotImplementedException(); }
         }
 
-        public ConfigBase Config
-        {
+        public ConfigBase Config {
             get { return mConfig; }
         }
 
-        public void Close()
-        {
+        public void Close() {
         }
 
         public void Draw(System.Drawing.Graphics graphics, Func<OpenMetaverse.Vector3, System.Drawing.Point> to2D, Action redraw, Perspective perspective) { }
 
-        private void TickListener()
-        {
-            if (mConfig.StopM < DateTime.Now.Subtract(mStarted).TotalMinutes)
-            {
+        private void TickListener() {
+            if (mConfig.StopM < DateTime.Now.Subtract(mStarted).TotalMinutes) {
                 Running = false;
-            }
-            else if (mConfig.IntervalMS < DateTime.Now.Subtract(mLastPress).TotalMilliseconds)
-            {
+            } else if (mConfig.IntervalMS < DateTime.Now.Subtract(mLastPress).TotalMilliseconds) {
                 TakeScreenshot();
                 mLastPress = DateTime.Now;
             }
         }
 
-        private void ScreenshotProcessor()
-        {
-            int image = 1;
-            while (mRunning || mScreenshots.Count > 0)
-            {
-                if (mScreenshots.Count > 0)
-                {
+        private void ScreenshotProcessor() {
+	    int image = 1;
+            while (mRunning || mScreenshots.Count > 0) {
+                if (mScreenshots.Count > 0) {
                     Bitmap screenshot = mScreenshots.Dequeue();
                     screenshot.Save(Path.Combine(mConfig.ScreenshotFolder, mConfig.ScreenshotFile) + "_" + (image++) + ".png");
                     screenshot.Dispose();
@@ -146,11 +120,9 @@ namespace Chimera.Plugins
                 mForm.Close();
         }
 
-        private void TakeScreenshot()
-        {
+        private void TakeScreenshot() {
             Bitmap screenshot = new Bitmap(mFrame.Monitor.Bounds.Width, mFrame.Monitor.Bounds.Height);
-            using (Graphics g = Graphics.FromImage(screenshot))
-            {
+            using (Graphics g = Graphics.FromImage(screenshot)) {
                 g.CopyFromScreen(mFrame.Monitor.Bounds.Location, Point.Empty, mFrame.Monitor.Bounds.Size);
             }
             mScreenshots.Enqueue(screenshot);

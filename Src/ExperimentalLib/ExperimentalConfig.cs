@@ -128,7 +128,7 @@ namespace Chimera.Experimental {
             TargetsFile = GetFileSection("AvatarMovement", "TargetsFile", "Experiments/CathedralRoute.xml", "The xml file where the nodes which make up a route are stored.");
             MapFile = GetFileSection("AvatarMovement", "MapFile", null, "The file where the map image one which the route is to be drawn on is stored.");
 
-            UserSettingsFolder = GetFolderSection("AvatarMovement", "UserSettingsFolder", "C:/Users/johnmcc/AppData/Roaming/Firestorm/user_settings/", "The folder where the settings file will be loaded from.");
+            UserSettingsFolder = GetFolderSection("AvatarMovement", "UserSettingsFolder", "C:/Users/openvirtualworlds/AppData/Roaming/Firestorm/user_settings/", "The folder where the settings file will be loaded from.");
             SettingsFile = GetFileSection("AvatarMovement", "SettingsFile", null, "The file where the configuration of the client is to be loaded from.");
             Region = GetSection("AvatarMovement", "Region", "Cathedral 1", "The region to connect to.");
 
